@@ -2,55 +2,7 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 CPPlwls1d <- function(bw, kernel_type, win, xin, yin, xout, npoly = 1L, nder = 0L) {
-    .Call('_fdapaceTemp_CPPlwls1d', PACKAGE = 'fdapaceTemp', bw, kernel_type, win, xin, yin, xout, npoly, nder)
-}
-
-GetIndCEScoresCPP <- function(yVec, muVec, lamVec, phiMat, SigmaYi) {
-    .Call('_fdapaceTemp_GetIndCEScoresCPP', PACKAGE = 'fdapaceTemp', yVec, muVec, lamVec, phiMat, SigmaYi)
-}
-
-GetIndCEScoresCPPnewInd <- function(yVec, muVec, lamVec, phiMat, SigmaYi, newPhi, newMu) {
-    .Call('_fdapaceTemp_GetIndCEScoresCPPnewInd', PACKAGE = 'fdapaceTemp', yVec, muVec, lamVec, phiMat, SigmaYi, newPhi, newMu)
-}
-
-RCPPmean <- function(X) {
-    .Call('_fdapaceTemp_RCPPmean', PACKAGE = 'fdapaceTemp', X)
-}
-
-RCPPvar <- function(X) {
-    .Call('_fdapaceTemp_RCPPvar', PACKAGE = 'fdapaceTemp', X)
-}
-
-RcppPseudoApprox <- function(X, Y, X_target) {
-    .Call('_fdapaceTemp_RcppPseudoApprox', PACKAGE = 'fdapaceTemp', X, Y, X_target)
-}
-
-Rcppsort <- function(v) {
-    .Call('_fdapaceTemp_Rcppsort', PACKAGE = 'fdapaceTemp', v)
-}
-
-Rmullwlsk <- function(bw, kernel_type, tPairs, cxxn, win, xgrid, ygrid, bwCheck, transp = TRUE) {
-    .Call('_fdapaceTemp_Rmullwlsk', PACKAGE = 'fdapaceTemp', bw, kernel_type, tPairs, cxxn, win, xgrid, ygrid, bwCheck, transp)
-}
-
-RmullwlskCC <- function(bw, kernel_type, tPairs, cxxn, win, xgrid, ygrid, bwCheck) {
-    .Call('_fdapaceTemp_RmullwlskCC', PACKAGE = 'fdapaceTemp', bw, kernel_type, tPairs, cxxn, win, xgrid, ygrid, bwCheck)
-}
-
-RmullwlskCCsort2 <- function(bw, kernel_type, tPairs, cxxn, win, xgrid, ygrid, bwCheck) {
-    .Call('_fdapaceTemp_RmullwlskCCsort2', PACKAGE = 'fdapaceTemp', bw, kernel_type, tPairs, cxxn, win, xgrid, ygrid, bwCheck)
-}
-
-RmullwlskUniversal <- function(bw, kernel_type, tPairs, cxxn, win, xgrid, ygrid, bwCheck, autoCov) {
-    .Call('_fdapaceTemp_RmullwlskUniversal', PACKAGE = 'fdapaceTemp', bw, kernel_type, tPairs, cxxn, win, xgrid, ygrid, bwCheck, autoCov)
-}
-
-RmullwlskUniversalDeriv <- function(bw, kernel_type, tPairs, cxxn, win, xgrid, ygrid, npoly, nder1, nder2, bwCheck, autoCov) {
-    .Call('_fdapaceTemp_RmullwlskUniversalDeriv', PACKAGE = 'fdapaceTemp', bw, kernel_type, tPairs, cxxn, win, xgrid, ygrid, npoly, nder1, nder2, bwCheck, autoCov)
-}
-
-Rrotatedmullwlsk <- function(bw, kernel_type, tPairs, cxxn, win, xygrid, npoly, bwCheck) {
-    .Call('_fdapaceTemp_Rrotatedmullwlsk', PACKAGE = 'fdapaceTemp', bw, kernel_type, tPairs, cxxn, win, xygrid, npoly, bwCheck)
+    .Call('_FDAconcur_CPPlwls1d', PACKAGE = 'FDAconcur', bw, kernel_type, win, xin, yin, xout, npoly, nder)
 }
 
 #' Cumulative Trapezoid Rule Numerical Integration
@@ -60,15 +12,15 @@ Rrotatedmullwlsk <- function(bw, kernel_type, tPairs, cxxn, win, xygrid, npoly, 
 #' @param Y Vector of Y values.
 #' @export 
 cumtrapzRcpp <- function(X, Y) {
-    .Call('_fdapaceTemp_cumtrapzRcpp', PACKAGE = 'fdapaceTemp', X, Y)
+    .Call('_FDAconcur_cumtrapzRcpp', PACKAGE = 'FDAconcur', X, Y)
 }
 
 dropZeroElementsXYWin <- function(win, xin, yin) {
-    .Call('_fdapaceTemp_dropZeroElementsXYWin', PACKAGE = 'fdapaceTemp', win, xin, yin)
+    .Call('_FDAconcur_dropZeroElementsXYWin', PACKAGE = 'FDAconcur', win, xin, yin)
 }
 
 interp2lin <- function(xin, yin, zin, xou, you) {
-    .Call('_fdapace_interp2lin', PACKAGE = 'fdapace', xin, yin, zin, xou, you)
+    .Call('_FDAconcur_interp2lin', PACKAGE = 'FDAconcur', xin, yin, zin, xou, you)
 }
 
 #' Trapezoid Rule Numerical Integration
@@ -78,6 +30,6 @@ interp2lin <- function(xin, yin, zin, xou, you) {
 #' @param Y Vector of Y values.
 #' @export
 trapzRcpp <- function(X, Y) {
-    .Call('_fdapaceTemp_trapzRcpp', PACKAGE = 'fdapaceTemp', X, Y)
+    .Call('_FDAconcur_trapzRcpp', PACKAGE = 'FDAconcur', X, Y)
 }
 
