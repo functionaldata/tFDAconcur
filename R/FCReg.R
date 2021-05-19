@@ -65,7 +65,7 @@
 #' @export
 
 
-FCReg <- function(vars, userBwMu=NULL, userBwCov=NULL, outGrid, kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE) {
+FCReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE) {
   
   n <- lengthVars(vars)
   p <- length(vars) - 1
