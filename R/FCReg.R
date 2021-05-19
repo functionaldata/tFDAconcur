@@ -136,8 +136,15 @@ demean <- function(vars, userBwMu, kern) {
       x <- x - xmu
     } else if (is.list(x)) { # functional
       Tin <- sort(unique(unlist(x[['Lt']])))
-      xmu <- GetSmoothedMeanCurve(x[['Ly']], x[['Lt']], Tin, Tin[1],
-                                  list(userBwMu=userBwMu, kernel=kern))[['mu']]
+      
+      if(is.null(userBwMu)){ # bandwidth choice for mean function is using GCV
+        optns <- SetOptions(x[['Ly']], x[['Lt']], list(userBwMu=userBwMu, methodBwMu ='GCV', kernel=kern))
+        xmu <- GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1], optns)[['mu']]
+      } else{
+        xmu <- GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1],
+                                    list(userBwMu=userBwMu, kernel=kern))[['mu']]
+      }
+      
       muFun <- approxfun(Tin, xmu)
       x[['Ly']] <- lapply(1:length(x[['Ly']]), function(i)
         x[['Ly']][[i]]- muFun(x[['Lt']][[i]]))
@@ -230,7 +237,14 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
   } else if (is.list(X) && !is.list(Y)) {
     Tin <- sort(unique(unlist(X[['Lt']])))
     if (center) {
-      Xmu <- GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1], list(userBwMu=userBwCov, kernel=kern))[['mu']]
+      
+      if(is.null(userBwCov)){ # bandwidth choice for mean function is using GCV
+        optns <- SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
+        Xmu <- GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1], optns)[['mu']]
+      } else{
+        Xmu <- GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1],
+                                    list(userBwMu=userBwCov, kernel=kern))[['mu']]
+      }
       Ymu <- mean(Y)
     } else {
       Xmu <- rep(0, length(Tin))
@@ -253,10 +267,20 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
           max(TinY) < max(outGrid) || max(TinX) < max(outGrid))
         stop('Observation time points coverage too low')
       
-      Xmu <- GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1],
-                                  list(userBwMu=userBwCov, kernel=kern))[['mu']]
-      Ymu <- GetSmoothedMeanCurve(Y[['Ly']], Y[['Lt']], TinY, TinY[1],
-                                  list(userBwMu=userBwCov, kernel=kern))[['mu']]
+      if(is.null(userBwCov)){ # bandwidth choice for mean function is using GCV
+        optns <- SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
+        Xmu <- GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1], optns)[['mu']]
+      } else{
+        Xmu <- GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1],
+                                    list(userBwMu=userBwCov, kernel=kern))[['mu']]
+      }
+      
+      if(is.null(userBwCov)){
+        optns <- SetOptions(Y[['Ly']], Y[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
+        Ymu <- GetSmoothedMeanCurve(Y[['Ly']], Y[['Lt']], TinX, TinX[1], optns)[['mu']]
+      }else{
+        Ymu <- GetSmoothedMeanCurve(Y[['Ly']], Y[['Lt']], TinY, TinY[1], list(userBwMu=userBwCov, kernel=kern))[['mu']]
+      }
     } else {
       Xmu <- rep(0, length(TinX))
       Ymu <- rep(0, length(TinY))
@@ -264,7 +288,7 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
     names(Xmu) <- TinX
     names(Ymu) <- TinY
     
-    if (use1D) {
+    if (use1D) { 
       Xvec <- unlist(X[['Ly']])
       Yvec <- unlist(Y[['Ly']])
       tvecX <- unlist(X[['Lt']])
@@ -279,9 +303,15 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
       Yvec <- Yvec[ord]
       Xcent <- Xvec - Xmu[as.character(tvecX)]
       Ycent <- Yvec - Ymu[as.character(tvecX)]
-      covXY <- Lwls1D(userBwCov, kern, npoly=1L, nder=0L, 
-                      xin=tvecX, yin=Xcent * Ycent, 
-                      win=rep(1, length(tvecX)), xout=outGrid)
+      
+      if(is.null(userBwCov)){
+        optns <- SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
+        bw_mu =  unlist(GCVLwls1D1(yy = Xcent * Ycent, tt = tvecX, kernel = kern, npoly = 1, nder = 0, dataType = optns$dataType) )[1] 
+        covXY <- Lwls1D(userBwCov=bw_mu, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
+      }else{
+        covXY <- Lwls1D(userBwCov=userBwCov, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
+      }
+      
       res <- matrix(NA, noutGrid, noutGrid)
       diag(res) <- covXY
     } else { # use 2D smoothing

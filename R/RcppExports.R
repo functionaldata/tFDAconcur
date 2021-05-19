@@ -68,7 +68,7 @@ dropZeroElementsXYWin <- function(win, xin, yin) {
 }
 
 interp2lin <- function(xin, yin, zin, xou, you) {
-    .Call('_fdapaceTemp_interp2lin', PACKAGE = 'fdapaceTemp', xin, yin, zin, xou, you)
+    .Call('_fdapace_interp2lin', PACKAGE = 'fdapace', xin, yin, zin, xou, you)
 }
 
 #' Trapezoid Rule Numerical Integration
