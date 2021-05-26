@@ -1,3 +1,0 @@
-useDynLib(mypackage, .registration=TRUE)
-importFrom(Rcpp, evalCpp)
-exportPattern("^[[:alpha:]]+")
