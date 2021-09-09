@@ -65,6 +65,7 @@
 #' @export
 
 
+
 ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE) {
   
   n <- lengthVars(vars)
@@ -319,7 +320,7 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
                         Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern)
       gd <- tmp[['smoothGrid']]
       res <- matrix(
-        interp2lin(as.numeric(gd[, 1]), 
+        fdapace:::interp2lin(as.numeric(gd[, 1]), 
                    as.numeric(gd[, 2]), 
                    matrix(as.numeric(tmp[['smoothedCC']]),
                           nrow(tmp[['smoothedCC']]),
