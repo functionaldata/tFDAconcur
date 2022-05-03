@@ -66,7 +66,7 @@
 
 
 
-ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE, snippet = FALSE) {
+ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE) {
   
   n <- lengthVars(vars)
   p <- length(vars) - 1
@@ -96,7 +96,7 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
   vars <- demeanedRes[['xList']]
   muList <- demeanedRes[['muList']]
   
-  allCov <- MvCov(vars, userBwCov, outGrid, kern, measurementError, center=FALSE, diag1D, snippet)
+  allCov <- MvCov(vars, userBwCov, outGrid, kern, measurementError, center=FALSE, diag1D)
   beta <- sapply(seq_len(dim(allCov)[1]), function(i) {
     tmpCov <- allCov[i, i, , ]
     beta_ti <- qr.solve(tmpCov[1:p, 1:p], tmpCov[1:p, p + 1])
@@ -143,7 +143,7 @@ demean <- function(vars, userBwMu, kern) {
         xmu <- fdapace:::GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1], optns)[['mu']]
       } else{
         xmu <- fdapace:::GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1],
-                                    list(userBwMu=userBwMu, kernel=kern))[['mu']]
+                                              list(userBwMu=userBwMu, kernel=kern))[['mu']]
       }
       
       #muFun <- approxfun(Tin, xmu)
@@ -166,7 +166,7 @@ demean <- function(vars, userBwMu, kern) {
 # INPUTS: same as FCReg
 # Output: a 4-D array containing the covariances. The first two dimensions corresponds to 
 # time s and t, and the last two dimensions correspond to the variables taken covariance upon.
-MvCov <- function(vars, userBwCov, outGrid, kern, measurementError=TRUE, center, diag1D='none', snippet=FALSE) {
+MvCov <- function(vars, userBwCov, outGrid, kern, measurementError=TRUE, center, diag1D='none') {
   if (!is.list(vars) || length(vars) < 1)
     stop('`vars` needs to be a list of length >= 1')
   
@@ -199,7 +199,7 @@ MvCov <- function(vars, userBwCov, outGrid, kern, measurementError=TRUE, center,
         use1D <- diag1D == 'all' || ( diag1D == 'cross' && j != i )
         covRes <- uniCov(vars[[i]], vars[[j]], userBwCov, outGrid, kern, 
                          rmDiag = (i == j) && measurementError, 
-                         center, use1D, snippet)
+                         center, use1D)
         if (attr(covRes, 'covType') %in% c('FF', 'SS'))
           res[, , i, j] <- covRes
         else {
@@ -224,7 +224,7 @@ MvCov <- function(vars, userBwCov, outGrid, kern, measurementError=TRUE, center,
 
 #X <- vars[[3]]
 #Y <- vars[[2]]
-uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=TRUE, use1D=FALSE, snippet=FALSE) {
+uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=TRUE, use1D=FALSE) {
   flagScalerFunc <- FALSE
   # Force X to be a function in the scalar-function case.
   if (!is.list(X) && is.list(Y)) {
@@ -249,15 +249,15 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
         Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1], optns)[['mu']]
       } else{
         Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1],
-                                    list(userBwMu=userBwCov, kernel=kern))[['mu']]
+                                              list(userBwMu=userBwCov, kernel=kern))[['mu']]
       }
       Ymu <- mean(Y)
     } else {
       Xmu <- rep(0, length(Tin))
       Ymu <- 0
     }
-    res <- GetCrCovYZ(userBwCov, Y, Ymu, X[['Ly']], X[['Lt']], Xmu, Tin, kern)[['smoothedCC']]
-    res <- as.matrix(ConvertSupport(Tin, outGrid, mu=res))
+    res <- fdapace:::GetCrCovYZ(userBwCov, Y, Ymu, X[['Ly']], X[['Lt']], Xmu, Tin, kern)[['smoothedCC']]
+    res <- as.matrix(fdapace:::ConvertSupport(Tin, outGrid, mu=res))
     #res <- as.matrix(res)
     if (flagScalerFunc) 
       res <- t(res)
@@ -279,7 +279,7 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
         Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1], optns)[['mu']]
       } else{
         Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1],
-                                    list(userBwMu=userBwCov, kernel=kern))[['mu']]
+                                              list(userBwMu=userBwCov, kernel=kern))[['mu']]
       }
       
       if(is.null(userBwCov)){
@@ -314,31 +314,34 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
       if(is.null(userBwCov)){
         optns <- fdapace:::SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
         bw_mu =  unlist(fdapace:::GCVLwls1D1(yy = Xcent * Ycent, tt = tvecX, kernel = kern, npoly = 1, nder = 0, dataType = optns$dataType) )[1] 
-        covXY <- Lwls1D(userBwCov=bw_mu, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
+        covXY <- fdapace::Lwls1D(userBwCov=bw_mu, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
       }else{
-        covXY <- Lwls1D(userBwCov=userBwCov, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
+        covXY <- fdapace::Lwls1D(userBwCov=userBwCov, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
       }
       
       res <- matrix(NA, noutGrid, noutGrid)
       diag(res) <- covXY
     } else { # use 2D smoothing
-      if(snippet){
-        tmp <- GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
-                        Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern, bwRoutine = 'grid-search')
-      }else{
-        tmp <- GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
-                          Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern)
-      }
+      
+      tmp <- fdapace:::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
+                                  Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern, bwRoutine = 'grid-search')
+      # if(snippet){
+      #   tmp <- fdapace:::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
+      #                   Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern, bwRoutine = 'grid-search')
+      # }else{
+      #   tmp <- fdapace:::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
+      #                     Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern)
+      # }
       
       gd <- tmp[['smoothGrid']]
       res <- matrix(
         fdapace:::interp2lin(as.numeric(gd[, 1]),
-                   as.numeric(gd[, 2]),
-                   matrix(as.numeric(tmp[['smoothedCC']]),
-                          nrow(tmp[['smoothedCC']]),
-                          ncol(tmp[['smoothedCC']])),
-                   rep(as.numeric(outGrid), times=noutGrid),
-                   rep(as.numeric(outGrid), each=noutGrid)),
+                             as.numeric(gd[, 2]),
+                             matrix(as.numeric(tmp[['smoothedCC']]),
+                                    nrow(tmp[['smoothedCC']]),
+                                    ncol(tmp[['smoothedCC']])),
+                             rep(as.numeric(outGrid), times=noutGrid),
+                             rep(as.numeric(outGrid), each=noutGrid)),
         noutGrid, noutGrid)
       
       # rawCC <- GetRawCrCovFuncFunc(Ly1 = X[['Ly']], Lt1 = X[['Lt']], Ymu1 = Xmu, Ly2 = Y[['Ly']], Lt2 = Y[['Lt']], Ymu2 = Ymu)
@@ -385,13 +388,6 @@ imputeConReg <- function(FPCAlist, Z, outGrid) {
   beta <- alphaBeta[-1, , drop=FALSE]
   
   return(list(beta0 = beta0, beta = beta, outGrid = outGrid))
-}
-
-## regObj: an object returned by mvConReg.
-## vars: a list of input functional/scalar covariates. Each field  can correspond to a covariate. 
-#        The last entry is assumed to be the response if no entry is names 'Y'.
-summaryConReg <- function(regObj, vars) {
-  
 }
 
 ## subset a list of covariates and responses.
