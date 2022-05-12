@@ -2,12 +2,19 @@
 #' 
 #' Functional concurrent regression with dense or sparse functional data for scalar or functional dependent variables. Note: function-to-scalar regression can also be handled using the VCAM function in fdapace. 
 #' 
-#' @param vars A list of input functional/scalar covariates. Each field corresponds to a functional (a list) or scalar (a vector) covariate. The last entry is assumed to be the response if no entry is names 'Y'. If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of function values.
-#' @param userBwMu A scalar with bandwidth used for smoothing the mean
-#' @param userBwCov A scalar with bandwidth used for smoothing the auto- and cross-covariances
+#' @param vars A list of input functional/scalar covariates.
+#'  Each field corresponds to a functional (a list) or scalar (a vector) covariate. 
+#'  The last entry is assumed to be the response if no entry is names 'Y'.
+#'  If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of function values.
 #' @param outGrid A vector with the output time points
-#' @param kern Smoothing kernel choice, common for mu and covariance; "rect", "gauss", "epan", "gausvar", "quar" (default: "gauss")
-#' @param measurementError Indicator measurement errors on the functional observations should be assumed. If TRUE the diagonal raw covariance will be removed when smoothing. (default: TRUE)
+#' @param userBwMu A scalar bandwidth used for smoothing the mean function --- positive numeric - 
+#' default: NULL --- if no scalar value is provided, the bandwidth value for the smoothed mean function is chosen using 'GCV'; 
+#' @param userBwCov A scalar bandwidth used for smoothing the auto- and cross-covariances --- positive numeric - 
+#' default: NULL --- if no scalar value is provided, the bandwidth value for the smoothed mean function is chosen using 'GCV'; 
+#' @param kern Smoothing kernel choice, common for mu and covariance; 
+#' "rect", "gauss", "epan", "gausvar", "quar" (default: "gauss")
+#' @param measurementError Indicator measurement errors on the functional observations 
+#' should be assumed. If TRUE the diagonal raw covariance will be removed when smoothing. (default: TRUE)
 #' @param diag1D  A string specifying whether to use 1D smoothing for the diagonal line of the covariance. 
 #' 'none': don't use 1D smoothing; 'cross': use 1D only for cross-covariances; 'all': use 1D for both auto- and cross-covariances. (default : 'none')
 #' @param useGAM Indicator to use gam smoothing instead of local-linear smoothing (semi-parametric option) (default: FALSE)
@@ -31,37 +38,37 @@
 #' # Y(t) = \beta_0(t) + \beta_1(t) X_1(t) + \beta_2(t) Z_2 + \epsilon
 #' 
 #' # Settings
-#' set.seed(1)
-#' n <- 75
-#' nGridIn <- 150
-#' sparsity <- 5:10 # Sparse data sparsity
-#' T <- round(seq(0, 1, length.out=nGridIn), 4) # Functional data support
-#' bw <- 0.1
-#' outGrid <- round(seq(min(T), 1, by=0.05), 2)
-#' 
-#' # Simulate functional data 
-#' mu <- T * 2 # mean function for X_1
-#' sigma <- 1
-#' 
-#' beta_0 <- 0
-#' beta_1 <- 1
-#' beta_2 <- 1
-#' 
-#' Z <- MASS::mvrnorm(n, rep(0, 2), diag(2))
-#' X_1 <- Z[, 1, drop=FALSE] %*% matrix(1, 1, nGridIn) + matrix(mu, n, nGridIn, byrow=TRUE)
-#' epsilon <- rnorm(n, sd=sigma)
-#' Y <- matrix(NA, n, nGridIn)
-#' for (i in seq_len(n)) {
-#'   Y[i, ] <- beta_0 + beta_1 * X_1[i, ] + beta_2 * Z[i, 2] + epsilon[i]
-#' }
-#' 
-#' # Sparsify functional data
-#' set.seed(1)
-#' X_1sp <- Sparsify(X_1, T, sparsity)
-#' set.seed(1)
-#' Ysp <- Sparsify(Y, T, sparsity)
-#' vars <- list(X_1=X_1sp, Z_2=Z[, 2], Y=Ysp)
-#' withError2D <- FCReg(vars, bw, bw, outGrid)
+set.seed(1)
+n <- 75
+nGridIn <- 150
+sparsity <- 5:10 # Sparse data sparsity
+T <- round(seq(0, 1, length.out=nGridIn), 4) # Functional data support
+bw <- 0.1
+outGrid <- round(seq(min(T), 1, by=0.05), 2)
+
+# Simulate functional data
+mu <- T * 2 # mean function for X_1
+sigma <- 1
+
+beta_0 <- 0
+beta <- rbind(cos(T), 1.5 + sin(T))
+beta_2 <- 1
+
+Z <- MASS::mvrnorm(n, rep(0, 2), diag(2))
+X_1 <- Z[, 1, drop=FALSE] %*% matrix(1, 1, nGridIn) + matrix(mu, n, nGridIn, byrow=TRUE)
+epsilon <- rnorm(n, sd=sigma)
+Y <- matrix(NA, n, nGridIn)
+for (i in seq_len(n)) {
+  Y[i, ] <- beta_0 + beta[1,] * X_1[i, ] + beta[2,] * Z[i, 2] + epsilon[i]
+}
+
+# Sparsify functional data
+set.seed(1)
+X_1sp <- fdapace::Sparsify(X_1, T, sparsity)
+set.seed(1)
+Ysp <- fdapace::Sparsify(Y, T, sparsity)
+vars <- list(X_1=X_1sp, Z_2=Z[, 2], Y=Ysp)
+res2 <- ConcurReg(vars, outGrid, userBwMu = .5, userBwCov=.5,  kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE)
 #' @export
 
 
