@@ -41,7 +41,18 @@
 #'   beta0 + beta[1,] * X_1[i, ] + beta[2,] * Z[i, 2] + epsilon[i]
 #' }))
 #' dat <- list(X1=X_1, Z1=Z[, 2], Y=Y)
-#' res = GetCI_Dense(dat, tGrid, level = 0.95, R = 10, bw = 2.5 / (nGridIn-1), kernel_type = 'epan')
+#' res <- ptFCReg(tGrid = tGrid, dat = dat)
+#' smres <- smPtFCRegCoef(res, bw =  2.5 / (nGridIn-1), kernel_type = 'epan')
+#' res_CI = GetCI_Dense(dat, tGrid, level = 0.95, R = 10, bw = 2.5 / (nGridIn-1), kernel_type = 'epan')
+#' beta1 = res_CI$CI_beta[[1]] ##extracting CI for beta1
+#' beta1a = beta1$CI_beta1.lower
+#' beta1b = beta1$CI_beta1.upper
+#' true_beta = beta[1,]  ##extracting true coef beta1 in the simulation setting
+#' est_beta = smres$beta[1,] ## ##extracting estimated coef beta1 from fitting the concurrent regression model
+#' plot(beta1$CIgrid, beta1a, type= 'l', ylim = c(0,2)) ##plot of lower CI for beta1
+#' lines(beta1$CIgrid, beta1b) ##plot of lower CI for beta1
+#' lines(beta1$CIgrid, true_beta, col ='red')  ##plot of true coef beta1 in the simulation setting
+#' lines(beta1$CIgrid, est_beta, col ='blue') ##plot of estimated coef beta1 from fitting the concurrent regression model
 #' @export
 
 GetCI_Dense <- function(dat, tGrid, level = 0.95, R = 10, bw, kernel_type){
