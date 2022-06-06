@@ -30,45 +30,47 @@
 #' \item{cov}{A 4-dimensional array for the (cross-)covariance surfaces, with the (i, j, k, l) entry being Cov(X_k(t_i), X_l(t_j))}
 #' \item{R2}{A vector of the time-varying R2.}
 #' \item{n}{The sample size.}
-#' @references
-#' \cite{Yao, F., Müller, H.G., Wang, J.L. "Functional Linear Regression Analysis for Longitudinal Data." Annals of Statistics 33, (2005): 2873-2903.(Dense data)} 
-#' \cite{Sentürk, D., Müller, H.G. "Functional varying coefficient models for longitudinal data." J. American Statistical Association, 10, (2010): 1256--1264.}
-#' \cite{Sentürk, D., Nguyen, D.V. "Varying Coefficient Models for Sparse Noise-contaminated Longitudinal Data", Statistica Sinica 21(4), (2011): 1831-1856. (Sparse data)} 
 #' @examples 
-#' # Y(t) = \beta_0(t) + \beta_1(t) X_1(t) + \beta_2(t) Z_2 + \epsilon
-#' 
+#' # Y(t) = beta_0(t) + beta_1(t) X_1(t) + beta_2(t) Z_2 + epsilon
+#' #
 #' # Settings
-set.seed(1)
-n <- 75
-nGridIn <- 150
-sparsity <- 5:10 # Sparse data sparsity
-T <- round(seq(0, 1, length.out=nGridIn), 4) # Functional data support
-bw <- 0.1
-outGrid <- round(seq(min(T), 1, by=0.05), 2)
-
-# Simulate functional data
-mu <- T * 2 # mean function for X_1
-sigma <- 1
-
-beta_0 <- 0
-beta <- rbind(cos(T), 1.5 + sin(T))
-beta_2 <- 1
-
-Z <- MASS::mvrnorm(n, rep(0, 2), diag(2))
-X_1 <- Z[, 1, drop=FALSE] %*% matrix(1, 1, nGridIn) + matrix(mu, n, nGridIn, byrow=TRUE)
-epsilon <- rnorm(n, sd=sigma)
-Y <- matrix(NA, n, nGridIn)
-for (i in seq_len(n)) {
-  Y[i, ] <- beta_0 + beta[1,] * X_1[i, ] + beta[2,] * Z[i, 2] + epsilon[i]
-}
-
-# Sparsify functional data
-set.seed(1)
-X_1sp <- fdapace::Sparsify(X_1, T, sparsity)
-set.seed(1)
-Ysp <- fdapace::Sparsify(Y, T, sparsity)
-vars <- list(X_1=X_1sp, Z_2=Z[, 2], Y=Ysp)
-res2 <- ConcurReg(vars, outGrid, userBwMu = .5, userBwCov=.5,  kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE)
+#' set.seed(1)
+#' n <- 75
+#' nGridIn <- 150
+#' sparsity <- 5:10 # Sparse data sparsity
+#' T <- round(seq(0, 1, length.out=nGridIn), 4) # Functional data support
+#' bw <- 0.1
+#' outGrid <- round(seq(min(T), 1, by=0.05), 2)
+#' 
+#' # Simulate functional data
+#' mu <- T * 2 # mean function for X_1
+#' sigma <- 1
+#' 
+#' beta_0 <- 0
+#' beta <- rbind(cos(T), 1.5 + sin(T))
+#' beta_2 <- 1
+#' 
+#' Z <- MASS::mvrnorm(n, rep(0, 2), diag(2))
+#' X_1 <- Z[, 1, drop=FALSE] %*% matrix(1, 1, nGridIn) + matrix(mu, n, nGridIn, byrow=TRUE)
+#' epsilon <- rnorm(n, sd=sigma)
+#' Y <- matrix(NA, n, nGridIn)
+#' for (i in seq_len(n)) {
+#'   Y[i, ] <- beta_0 + beta[1,]*X_1[i, ] + beta[2,]*Z[i, 2] + epsilon[i]
+#' }
+#' 
+#' # Sparsify functional data
+#' set.seed(1)
+#' X_1sp <- fdapace::Sparsify(X_1, T, sparsity)
+#' set.seed(1)
+#' Ysp <- fdapace::Sparsify(Y, T, sparsity)
+#' vars <- list(X_1=X_1sp, Z_2=Z[, 2], Y=Ysp)
+#' res2 <- ConcurReg(vars, outGrid, userBwMu = .5, userBwCov=.5,  kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE)
+#' @references
+#' \itemize{
+#' \item \cite{Yao, F., Müller, H.G., Wang, J.L. "Functional Linear Regression Analysis for Longitudinal Data." Annals of Statistics 33, (2005): 2873-2903.(Dense data)} 
+#' \item \cite{Sentürk, D., Müller, H.G. "Functional varying coefficient models for longitudinal data." J. American Statistical Association, 10, (2010): 1256--1264.}
+#' \item \cite{Sentürk, D., Nguyen, D.V. "Varying Coefficient Models for Sparse Noise-contaminated Longitudinal Data", Statistica Sinica 21(4), (2011): 1831-1856. (Sparse data)} 
+#' }
 #' @export
 
 
