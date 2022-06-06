@@ -98,6 +98,19 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
   )
   # outGrid <- as.numeric(outGrid)
   
+  # handle ourGrid range
+  temp <- lapply(
+    vars[sapply(vars, is.list)], 
+    function(v) {
+      return(range(unlist(v[['Lt']])))
+    }
+  )
+  l <- max(unlist(lapply(temp, function(v){return(v[1])})))
+  u <- min(unlist(lapply(temp, function(v){return(v[2])})))
+  grid.index <- which((outGrid > l) & (outGrid < u))
+  grid.full <- outGrid
+  outGrid <- outGrid[grid.index]
+  
   # De-mean.
   demeanedRes <- demean(vars, userBwMu, kern)
   vars <- demeanedRes[['xList']]
@@ -131,7 +144,21 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
   })
   beta0 <- muList[[Yname]](outGrid) - colSums(t(muBeta))
   
-  res <- list(beta=beta, beta0 = beta0, outGrid=outGrid, cov=allCov, R2=R2, n=n)
+  ## enlarge output
+  beta0.full <- length(grid.full)
+  beta0.full <- beta0[grid.index]
+  if(is.vector(beta)){
+    beta.full <- rep(NA, length(grid.full))
+    beta.full[grid.index] <- beta
+  }else{
+    beta.full <- matrix(NA, dim(beta)[1], length(grid.full))
+    beta.full[, grid.index] <- beta
+  }
+  allCov.full <- array(NA, c(length(grid.full), length(grid.full), dim(allCov)[3], dim(allCov)[4]))
+  allCov.full[grid.index, grid.index,,] <- allCov
+  
+  #res <- list(beta=beta, beta0 = beta0, outGrid=outGrid, cov=allCov, R2=R2, n=n)
+  res <- list(beta=beta.full, beta0 = beta0.full, outGrid=grid.full, cov=allCov.full, R2=R2, n=n)
   if (!returnCov)
     res[['cov']] <- NULL
   res
