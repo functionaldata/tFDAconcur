@@ -38,6 +38,11 @@ ptFCReg <- function(tGrid, dat) {
   if ( !'Y' %in% names(dat) ) {
     names(dat)[length(dat)] <- 'Y'
   }
+  for(i in 1:(length(dat)-1)){
+    if(is.na(names(dat)[i])){
+      names(dat)[i] = paste0('X',sprintf("%d",i))
+    }
+  }
   if ( !is.matrix(dat$Y) ) {
     stop("The field in dat for the response is not a matrix.")
   }
@@ -88,3 +93,59 @@ ptFCReg <- function(tGrid, dat) {
   class(res) <- "ptFCReg"
   return(res)
 }
+
+
+# ptFCReg <- function(tGrid, dat) {
+#   if ( !'Y' %in% names(dat) ) {
+#     names(dat)[length(dat)] <- 'Y'
+#   }
+#   if ( !is.matrix(dat$Y) ) {
+#     stop("The field in dat for the response is not a matrix.")
+#   }
+#   nSubj <- nrow(dat$Y)
+#   lenGrid <- length(tGrid)
+#   if (!all(sapply(dat, function(var) { is.vector(var) | is.matrix(var)}))) {
+#     stop("Fields of dat are not vectors or matrices.")
+#   }
+#   
+#   Z <- sapply(dat, is.vector)
+#   # indices for scalar covariates in dat:
+#   indZ <- which(Z)
+#   # indices for functional covariates in dat:
+#   indX <- which(sapply(dat[names(dat) != 'Y'], is.matrix)) 
+#   
+#   if ( length(indX) > 0 ) {
+#     if ( any( abs( sapply(dat[indX], ncol) - lenGrid) > 0 ) ) {
+#       stop("Columns in the matrices corresponding to the functional variables do not match with tGrid.")
+#     }
+#     if ( any( abs( sapply(dat[indX], nrow) - nSubj) > 0 ) ) {
+#       stop("Numbers of rows in the matrices corresponding to the functional variables are not all the same.")
+#     }
+#   }
+#   if ( length(indZ) > 0 ) {
+#     if ( any( abs( sapply(dat[indZ], length) - nSubj) > 0 ) ) {
+#       stop("Lengths of the vectors corresponding to scalar covariates are not all the same as the number of subjects in the functional response.")
+#     }
+#   }
+#   
+#   # A list of data frames, each corresponding to the data observed at one time point
+#   Ldf <- lapply(seq_len(lenGrid), function(j) {
+#     df <- as.data.frame(lapply(dat, function(var) {
+#       if (is.vector(var)) {
+#         return(var)
+#       } else return(var[,j])
+#     }))
+#     names(df) <- names(dat)
+#     df
+#   })
+#   
+#   Lmod <- lapply(Ldf, function(df) {
+#     lm( Y ~ ., data = df )
+#   })
+#   coef <- sapply(Lmod, coef)
+#   R2 <- sapply(Lmod, function(mod) summary(mod)$r.sq)
+#   res <- list(beta0 = coef[1,], beta = coef[-1, , drop = FALSE], tGrid = tGrid, R2 = R2, Ldf = Ldf)
+#   rownames(res$beta) <- names(dat[names(dat) != 'Y'])
+#   class(res) <- "ptFCReg"
+#   return(res)
+# }

@@ -2,12 +2,19 @@
 #' 
 #' Functional concurrent regression with dense or sparse functional data for scalar or functional dependent variables. Note: function-to-scalar regression can also be handled using the VCAM function in fdapace. 
 #' 
-#' @param vars A list of input functional/scalar covariates. Each field corresponds to a functional (a list) or scalar (a vector) covariate. The last entry is assumed to be the response if no entry is names 'Y'. If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of function values.
-#' @param userBwMu A scalar with bandwidth used for smoothing the mean
-#' @param userBwCov A scalar with bandwidth used for smoothing the auto- and cross-covariances
+#' @param vars A list of input functional/scalar covariates.
+#'  Each field corresponds to a functional (a list) or scalar (a vector) covariate. 
+#'  The last entry is assumed to be the response if no entry is names 'Y'.
+#'  If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of function values.
 #' @param outGrid A vector with the output time points
-#' @param kern Smoothing kernel choice, common for mu and covariance; "rect", "gauss", "epan", "gausvar", "quar" (default: "gauss")
-#' @param measurementError Indicator measurement errors on the functional observations should be assumed. If TRUE the diagonal raw covariance will be removed when smoothing. (default: TRUE)
+#' @param userBwMu A scalar bandwidth used for smoothing the mean function --- positive numeric - 
+#' default: NULL --- if no scalar value is provided, the bandwidth value for the smoothed mean function is chosen using 'GCV'; 
+#' @param userBwCov A scalar bandwidth used for smoothing the auto- and cross-covariances --- positive numeric - 
+#' default: NULL --- if no scalar value is provided, the bandwidth value for the smoothed mean function is chosen using 'GCV'; 
+#' @param kern Smoothing kernel choice, common for mu and covariance; 
+#' "rect", "gauss", "epan", "gausvar", "quar" (default: "gauss")
+#' @param measurementError Indicator measurement errors on the functional observations 
+#' should be assumed. If TRUE the diagonal raw covariance will be removed when smoothing. (default: TRUE)
 #' @param diag1D  A string specifying whether to use 1D smoothing for the diagonal line of the covariance. 
 #' 'none': don't use 1D smoothing; 'cross': use 1D only for cross-covariances; 'all': use 1D for both auto- and cross-covariances. (default : 'none')
 #' @param useGAM Indicator to use gam smoothing instead of local-linear smoothing (semi-parametric option) (default: FALSE)
@@ -23,13 +30,9 @@
 #' \item{cov}{A 4-dimensional array for the (cross-)covariance surfaces, with the (i, j, k, l) entry being Cov(X_k(t_i), X_l(t_j))}
 #' \item{R2}{A vector of the time-varying R2.}
 #' \item{n}{The sample size.}
-#' @references
-#' \cite{Yao, F., Müller, H.G., Wang, J.L. "Functional Linear Regression Analysis for Longitudinal Data." Annals of Statistics 33, (2005): 2873-2903.(Dense data)} 
-#' \cite{Sentürk, D., Müller, H.G. "Functional varying coefficient models for longitudinal data." J. American Statistical Association, 10, (2010): 1256--1264.}
-#' \cite{Sentürk, D., Nguyen, D.V. "Varying Coefficient Models for Sparse Noise-contaminated Longitudinal Data", Statistica Sinica 21(4), (2011): 1831-1856. (Sparse data)} 
 #' @examples 
-#' # Y(t) = \beta_0(t) + \beta_1(t) X_1(t) + \beta_2(t) Z_2 + \epsilon
-#' 
+#' # Y(t) = beta_0(t) + beta_1(t) X_1(t) + beta_2(t) Z_2 + epsilon
+#' #
 #' # Settings
 #' set.seed(1)
 #' n <- 75
@@ -39,12 +42,12 @@
 #' bw <- 0.1
 #' outGrid <- round(seq(min(T), 1, by=0.05), 2)
 #' 
-#' # Simulate functional data 
+#' # Simulate functional data
 #' mu <- T * 2 # mean function for X_1
 #' sigma <- 1
 #' 
 #' beta_0 <- 0
-#' beta_1 <- 1
+#' beta <- rbind(cos(T), 1.5 + sin(T))
 #' beta_2 <- 1
 #' 
 #' Z <- MASS::mvrnorm(n, rep(0, 2), diag(2))
@@ -52,16 +55,22 @@
 #' epsilon <- rnorm(n, sd=sigma)
 #' Y <- matrix(NA, n, nGridIn)
 #' for (i in seq_len(n)) {
-#'   Y[i, ] <- beta_0 + beta_1 * X_1[i, ] + beta_2 * Z[i, 2] + epsilon[i]
+#'   Y[i, ] <- beta_0 + beta[1,]*X_1[i, ] + beta[2,]*Z[i, 2] + epsilon[i]
 #' }
 #' 
 #' # Sparsify functional data
 #' set.seed(1)
-#' X_1sp <- Sparsify(X_1, T, sparsity)
+#' X_1sp <- fdapace::Sparsify(X_1, T, sparsity)
 #' set.seed(1)
-#' Ysp <- Sparsify(Y, T, sparsity)
+#' Ysp <- fdapace::Sparsify(Y, T, sparsity)
 #' vars <- list(X_1=X_1sp, Z_2=Z[, 2], Y=Ysp)
-#' withError2D <- FCReg(vars, bw, bw, outGrid)
+#' res2 <- ConcurReg(vars, outGrid, userBwMu = .5, userBwCov=.5,  kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE)
+#' @references
+#' \itemize{
+#' \item \cite{Yao, F., Müller, H.G., Wang, J.L. "Functional Linear Regression Analysis for Longitudinal Data." Annals of Statistics 33, (2005): 2873-2903.(Dense data)} 
+#' \item \cite{Sentürk, D., Müller, H.G. "Functional varying coefficient models for longitudinal data." J. American Statistical Association, 10, (2010): 1256--1264.}
+#' \item \cite{Sentürk, D., Nguyen, D.V. "Varying Coefficient Models for Sparse Noise-contaminated Longitudinal Data", Statistica Sinica 21(4), (2011): 1831-1856. (Sparse data)} 
+#' }
 #' @export
 
 
@@ -90,6 +99,19 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
     function(v) fdapace:::HandleNumericsAndNAN(v[['Ly']], v[['Lt']])
   )
   # outGrid <- as.numeric(outGrid)
+  
+  # handle ourGrid range
+  temp <- lapply(
+    vars[sapply(vars, is.list)], 
+    function(v) {
+      return(range(unlist(v[['Lt']])))
+    }
+  )
+  l <- max(unlist(lapply(temp, function(v){return(v[1])})))
+  u <- min(unlist(lapply(temp, function(v){return(v[2])})))
+  grid.index <- which((outGrid > l) & (outGrid < u))
+  grid.full <- outGrid
+  outGrid <- outGrid[grid.index]
   
   # De-mean.
   demeanedRes <- demean(vars, userBwMu, kern)
@@ -124,7 +146,21 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
   })
   beta0 <- muList[[Yname]](outGrid) - colSums(t(muBeta))
   
-  res <- list(beta=beta, beta0 = beta0, outGrid=outGrid, cov=allCov, R2=R2, n=n)
+  ## enlarge output
+  beta0.full <- length(grid.full)
+  beta0.full <- beta0[grid.index]
+  if(is.vector(beta)){
+    beta.full <- rep(NA, length(grid.full))
+    beta.full[grid.index] <- beta
+  }else{
+    beta.full <- matrix(NA, dim(beta)[1], length(grid.full))
+    beta.full[, grid.index] <- beta
+  }
+  allCov.full <- array(NA, c(length(grid.full), length(grid.full), dim(allCov)[3], dim(allCov)[4]))
+  allCov.full[grid.index, grid.index,,] <- allCov
+  
+  #res <- list(beta=beta, beta0 = beta0, outGrid=outGrid, cov=allCov, R2=R2, n=n)
+  res <- list(beta=beta.full, beta0 = beta0.full, outGrid=grid.full, cov=allCov.full, R2=R2, n=n)
   if (!returnCov)
     res[['cov']] <- NULL
   res
@@ -143,10 +179,11 @@ demean <- function(vars, userBwMu, kern) {
         xmu <- fdapace:::GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1], optns)[['mu']]
       } else{
         xmu <- fdapace:::GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1],
-                                    list(userBwMu=userBwMu, kernel=kern))[['mu']]
+                                              list(userBwMu=userBwMu, kernel=kern))[['mu']]
       }
       
-      muFun <- approxfun(Tin, xmu)
+      #muFun <- approxfun(Tin, xmu)
+      muFun <- approxfun(Tin, xmu, rule=2)
       x[['Ly']] <- lapply(1:length(x[['Ly']]), function(i)
         x[['Ly']][[i]]- muFun(x[['Lt']][[i]]))
       xmu <- muFun
@@ -165,7 +202,7 @@ demean <- function(vars, userBwMu, kern) {
 # INPUTS: same as FCReg
 # Output: a 4-D array containing the covariances. The first two dimensions corresponds to 
 # time s and t, and the last two dimensions correspond to the variables taken covariance upon.
-MvCov <- function(vars, userBwCov, outGrid, kern, measurementError=TRUE, center=TRUE, diag1D='none') {
+MvCov <- function(vars, userBwCov, outGrid, kern, measurementError=TRUE, center, diag1D='none') {
   if (!is.list(vars) || length(vars) < 1)
     stop('`vars` needs to be a list of length >= 1')
   
@@ -193,6 +230,7 @@ MvCov <- function(vars, userBwCov, outGrid, kern, measurementError=TRUE, center=
   res <- array(NA, c(lenoutGrid, lenoutGrid, p, p))
   for (j in seq_len(p)) {
     for (i in seq_len(p)) {
+      #print(c(i,j))
       if (j <= i) {
         use1D <- diag1D == 'all' || ( diag1D == 'cross' && j != i )
         covRes <- uniCov(vars[[i]], vars[[j]], userBwCov, outGrid, kern, 
@@ -219,6 +257,9 @@ MvCov <- function(vars, userBwCov, outGrid, kern, measurementError=TRUE, center=
 # rmDiag: whether to remove the diagonal of the raw covariance. Ignored if 1D smoother is used.
 # center: whether to center the covariates before calculate covariance.
 # use1D: whether to use 1D smoothing for estimating the diagonal covariance.
+
+#X <- vars[[3]]
+#Y <- vars[[2]]
 uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=TRUE, use1D=FALSE) {
   flagScalerFunc <- FALSE
   # Force X to be a function in the scalar-function case.
@@ -244,15 +285,16 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
         Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1], optns)[['mu']]
       } else{
         Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1],
-                                    list(userBwMu=userBwCov, kernel=kern))[['mu']]
+                                              list(userBwMu=userBwCov, kernel=kern))[['mu']]
       }
       Ymu <- mean(Y)
     } else {
       Xmu <- rep(0, length(Tin))
       Ymu <- 0
     }
-    res <- GetCrCovYZ(userBwCov, Y, Ymu, X[['Ly']], X[['Lt']], Xmu, Tin, kern)[['smoothedCC']]
-    res <- as.matrix(ConvertSupport(Tin, outGrid, mu=res))
+    res <- fdapace:::GetCrCovYZ(userBwCov, Y, Ymu, X[['Ly']], X[['Lt']], Xmu, Tin, kern)[['smoothedCC']]
+    res <- as.matrix(fdapace:::ConvertSupport(Tin, outGrid, mu=res))
+    #res <- as.matrix(res)
     if (flagScalerFunc) 
       res <- t(res)
     
@@ -273,7 +315,7 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
         Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1], optns)[['mu']]
       } else{
         Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1],
-                                    list(userBwMu=userBwCov, kernel=kern))[['mu']]
+                                              list(userBwMu=userBwCov, kernel=kern))[['mu']]
       }
       
       if(is.null(userBwCov)){
@@ -308,26 +350,45 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
       if(is.null(userBwCov)){
         optns <- fdapace:::SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
         bw_mu =  unlist(fdapace:::GCVLwls1D1(yy = Xcent * Ycent, tt = tvecX, kernel = kern, npoly = 1, nder = 0, dataType = optns$dataType) )[1] 
-        covXY <- Lwls1D(userBwCov=bw_mu, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
+        covXY <- fdapace::Lwls1D(userBwCov=bw_mu, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
       }else{
-        covXY <- Lwls1D(userBwCov=userBwCov, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
+        covXY <- fdapace::Lwls1D(userBwCov=userBwCov, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
       }
       
       res <- matrix(NA, noutGrid, noutGrid)
       diag(res) <- covXY
     } else { # use 2D smoothing
-      tmp <- GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu, 
-                        Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern)
+      
+      tmp <- fdapace:::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
+                                  Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern, bwRoutine = 'grid-search')
+      # if(snippet){
+      #   tmp <- fdapace:::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
+      #                   Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern, bwRoutine = 'grid-search')
+      # }else{
+      #   tmp <- fdapace:::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
+      #                     Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern)
+      # }
+      
       gd <- tmp[['smoothGrid']]
       res <- matrix(
-        fdapace:::interp2lin(as.numeric(gd[, 1]), 
-                   as.numeric(gd[, 2]), 
-                   matrix(as.numeric(tmp[['smoothedCC']]),
-                          nrow(tmp[['smoothedCC']]),
-                          ncol(tmp[['smoothedCC']])), 
-                   rep(as.numeric(outGrid), times=noutGrid), 
-                   rep(as.numeric(outGrid), each=noutGrid)), 
+        fdapace:::interp2lin(as.numeric(gd[, 1]),
+                             as.numeric(gd[, 2]),
+                             matrix(as.numeric(tmp[['smoothedCC']]),
+                                    nrow(tmp[['smoothedCC']]),
+                                    ncol(tmp[['smoothedCC']])),
+                             rep(as.numeric(outGrid), times=noutGrid),
+                             rep(as.numeric(outGrid), each=noutGrid)),
         noutGrid, noutGrid)
+      
+      # rawCC <- GetRawCrCovFuncFunc(Ly1 = X[['Ly']], Lt1 = X[['Lt']], Ymu1 = Xmu, Ly2 = Y[['Ly']], Lt2 = Y[['Lt']], Ymu2 = Ymu)
+      # if (rmDiag) {
+      #   diagInd <- rawCC$tpairn[, 1] == rawCC$tpairn[, 2]
+      #   rawCC$tpairn <- rawCC$tpairn[!diagInd, , drop=FALSE]
+      #   rawCC$rawCCov <- rawCC$rawCCov[!diagInd]
+      # }
+      # res <- Lwls2D(userBwCov, kern, rawCC[['tpairn']], rawCC[['rawCCov']], 
+      #               xout1=outGrid, xout2=outGrid, crosscov=TRUE)
+      
     }
     attr(res, 'covType') <- 'FF'
   }
@@ -365,13 +426,6 @@ imputeConReg <- function(FPCAlist, Z, outGrid) {
   return(list(beta0 = beta0, beta = beta, outGrid = outGrid))
 }
 
-## regObj: an object returned by mvConReg.
-## vars: a list of input functional/scalar covariates. Each field  can correspond to a covariate. 
-#        The last entry is assumed to be the response if no entry is names 'Y'.
-summaryConReg <- function(regObj, vars) {
-  
-}
-
 ## subset a list of covariates and responses.
 subsetVars <- function(vars, subset) {
   sapply(vars, function(x) {
@@ -403,4 +457,9 @@ lengthVars <- function(vars, subset) {
   
   return(len)
 }
+
+
+
+
+
 
