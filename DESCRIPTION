@@ -41,7 +41,7 @@ Description: Provides implementation of concurrent or varying coefficient regres
 License: BSD_3_clause + file LICENSE
 LazyData: false
 Imports:
-    fdapace
+    fdapace,
     MASS,
     Matrix,
     pracma,
