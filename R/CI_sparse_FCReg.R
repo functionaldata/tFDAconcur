@@ -21,21 +21,28 @@
 #' @param returnCov Indicator to return the covariance surfaces, which is a four dimensional array. The first two dimensions correspond to outGrid
 #'  and the last two correspond to the covariates and the response, i.e. (i, j, k, l) entry being Cov(X_k(t_i), X_l(t_j)) (default: FALSE)
 #' 
-#' @details If measurement error is assumed, the diagonal elements of the raw covariance will be removed. This could result in highly unstable estimate if the design is very sparse, or strong seasonality presents. 
+#' @details If measurement error is assumed, the diagonal elements of the raw covariance will be removed. This could result in highly unstable estimate 
+#' if the design is very sparse, or strong seasonality presents. 
 #' WARNING! For very sparse functional data, setting measurementError = TRUE is not recommended.
 #' @return A list containing the following fields: 
 #' \describe{
 #' \item{CI_beta0}{CI for the intercept function --- A data frame holding three variables: 
-#' \code{CIgrid} --- the time grid where the CIs are evaluated --- this is same as the input \code{tGrid};
-#' \code{CI_beta0.lower} and \code{CI_beta0.upper} --- the lower and upper bounds of the CIs for the intercept function on \code{CIgrid}.}
+#' \code{CIgrid} --- the time grid where the CIs are evaluated,
+#' \code{CI_beta0.lower} and \code{CI_beta0.upper} --- the lower and upper bounds of the CIs 
+#' for the intercept function on \code{CIgrid}.}
+#' 
 #' \item{CI_beta}{ A list containing CIs for the slope functions --- the length of
 #' the list is same as the number of covariates. Each list contains the following fields:
-#' A data frame holding three variables: \code{CIgrid} --- the time grid where the CIs are evaluated --- this is same as the input \code{tGrid}; 
-#' \code{CI_beta\eqn{j}.lower} and \code{CI_beta\eqn{j}.upper} --- the lower and upper bounds of the CIs for the intercept function on \code{CIgrid} for \eqn{j = 1,2,\dots}}
+#' A data frame holding three variables: \code{CIgrid} --- the time grid where the CIs are evaluated,
+#' \code{CI_beta_j.lower} and \code{CI_beta_j.upper} --- the lower and upper bounds of the CIs 
+#' for the intercept function on \code{CIgrid} for \eqn{j = 1,2,\dots}.}
+#' 
 #' \item{CI_R2}{CI the time-varying \eqn{R^2(t)} --- A data frame holding three variables: 
-#' \code{CIgrid} --- the time grid where the CIs are evaluated --- this is same as the input \code{tGrid}; 
-#' \code{CI_R2.lower} and \code{CI_R2.upper} --- the lower and upper bounds of the CIs for the time-varying \eqn{R^2(t)} on \code{CIgrid}.}
-#' \item{level}{The confidence level of the CIs}.
+#' \code{CIgrid} --- the time grid where the CIs are evaluated,
+#' \code{CI_R2.lower} and \code{CI_R2.upper} --- the lower and upper bounds of the CIs 
+#' for the time-varying \eqn{R^2(t)} on \code{CIgrid}.}
+#' 
+#' \item{level}{The confidence level of the CIs.}
 #' }
 #' @examples 
 #'
@@ -68,25 +75,16 @@
 #' set.seed(1)
 #' Ysp <- fdapace::Sparsify(Y, T, sparsity)
 #' vars <- list(X_1=X_1sp, Z_2=Z[, 2], Y=Ysp)
-#' est = ConcurReg(vars, outGrid, userBwMu = .5, userBwCov=.5,  kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE)
-#' res <- GetCI_SparseConcurReg(vars, outGrid, level = 0.95, R = 10, 
+#' est = ConcurReg(vars, outGrid, userBwMu = .5, userBwCov=.5,  kern='gauss', 
+#' measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE)
+#' res <-  GetCI_Sparse(vars, outGrid, level = 0.95, R = 10, 
 #'                              userBwMu = .5, userBwCov = .5,  
 #'                              kern='gauss', measurementError=TRUE, diag1D='none',
 #'                              useGAM = FALSE, returnCov=TRUE)
-#' plot(c(), xlim = c(0,21), ylim = c(-2,2))
-#' plot(beta_0, type = 'l')
-#' lines(est$beta0)
-#' lines(res$CI_beta0$CI_beta0.lower, col = 'red')
-#' lines(res$CI_beta0$CI_beta0.upper, col = 'green')
-#' 
-#' plot(c(), xlim = c(0,21), ylim = c(-2,2))
-#' lines(beta[1,], type = 'l')
-#' lines(est$beta[1,])
-#' lines(res$CI_beta$CI_beta1$CI_beta1.lower, col ='red')
-#' lines(res$CI_beta$CI_beta1$CI_beta1.upper, col = 'green')
+#' @export
 
-
-GetCI_SparseConcurReg <- function(vars, outGrid, level = 0.95, R = 10, userBwMu = .5, userBwCov=.5,  kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE){
+GetCI_Sparse = function(vars, outGrid, level = 0.95, R = 10, userBwMu = .5, userBwCov=.5,  
+                        kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE){
   if (length(level) > 1) {
     level = level[1]
     warning("The input level has more than 1 element; only the first one is used.")
@@ -109,20 +107,24 @@ GetCI_SparseConcurReg <- function(vars, outGrid, level = 0.95, R = 10, userBwMu 
         vars[[j]] = vars[[j]][ind]
       }
     }
+    #res2 <- ConcurReg(vars, outGrid, userBwMu = .5, userBwCov=.5,  kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE)
     res <- ConcurReg(vars, outGrid, userBwMu = userBwMu, userBwCov = userBwCov,  kern = kern,
-            measurementError = measurementError, diag1D = diag1D, useGAM = useGAM , returnCov = returnCov)
-    return(list(beta0 = res$beta0, beta = res$beta, R2 = res$R2))
+           measurementError = measurementError, diag1D = diag1D, useGAM = useGAM , returnCov = returnCov)
+    return(list(beta0 = res$beta0, beta = res$beta, R2 = res$R2, outGrid = res$outGrid))
   })
+  
+  
   CI_beta0 = apply(t(sapply(1:R, function(b){
     betaMat[[b]]$beta0
-  })), 2, quantile, c((1-level)/2, 1-(1-level)/2))
-  CI_beta0 = data.frame(CI_beta0.lower = CI_beta0[1,], CI_beta0.upper = CI_beta0[2,], CIgrid = outGrid)
+  }, simplify = TRUE)), 2, quantile, c((1-level)/2, 1-(1-level)/2))
+  
+  CI_beta0 = data.frame(CI_beta0.lower = CI_beta0[1,], CI_beta0.upper = CI_beta0[2,], CIgrid = betaMat[[1]]$outGrid)
   CI_beta = lapply(1:p, function(j){
     ci_beta_df =  data.frame( t(apply(t(sapply(1:R, function(b){
       betaMat[[b]]$beta[j,]
     })), 2, quantile, c((1-level)/2, 1-(1-level)/2))))
     names(ci_beta_df) =  c( sprintf("CI_beta%d.lower", j)  ,sprintf("CI_beta%d.upper", j)) 
-    ci_beta_df$CIgrid = outGrid
+    ci_beta_df$CIgrid = betaMat[[1]]$outGrid
     return(ci_beta_df)
   })
   names(CI_beta) = sapply(1:p, function(j) { sprintf("CI_beta%d", j)})
@@ -130,7 +132,7 @@ GetCI_SparseConcurReg <- function(vars, outGrid, level = 0.95, R = 10, userBwMu 
   CI_R2 = apply(t(sapply(1:R, function(b){
     betaMat[[b]]$R2 
   })), 2, quantile, c((1-level)/2, 1-(1-level)/2))
-  CI_R2 = data.frame(CI_R2.lower = CI_R2[1,], CI_R2.upper = CI_R2[2,], CIgrid = outGrid)
+  CI_R2 = data.frame(CI_R2.lower = CI_R2[1,], CI_R2.upper = CI_R2[2,], CIgrid = betaMat[[1]]$outGrid)
   return(list(CI_beta0 = CI_beta0, CI_beta = CI_beta, CI_R2 = CI_R2,
               level = level))
   

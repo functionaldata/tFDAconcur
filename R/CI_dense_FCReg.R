@@ -14,16 +14,22 @@
 #' @return A list containing the following fields: 
 #' \describe{
 #' \item{CI_beta0}{CI for the intercept function --- A data frame holding three variables: 
-#' \code{CIgrid} --- the time grid where the CIs are evaluated --- this is same as the input \code{tGrid};
-#' \code{CI_beta0.lower} and \code{CI_beta0.upper} --- the lower and upper bounds of the CIs for the intercept function on \code{CIgrid}.}
+#' \code{CIgrid} --- the time grid where the CIs are evaluated;
+#' \code{CI_beta0.lower} and \code{CI_beta0.upper} --- the lower and upper bounds of the CIs
+#' for the intercept function on \code{CIgrid}.}
+#' 
 #' \item{CI_beta}{ A list containing CIs for the slope functions --- the length of
 #' the list is same as the number of covariates. Each list contains the following fields:
-#' A data frame holding three variables: \code{CIgrid} --- the time grid where the CIs are evaluated --- this is same as the input \code{tGrid}; 
-#' \code{CI_beta\eqn{j}.lower} and \code{CI_beta\eqn{j}.upper} --- the lower and upper bounds of the CIs for the intercept function on \code{CIgrid} for \eqn{j = 1,2,\dots}}
+#' A data frame holding three variables: \code{CIgrid} --- the time grid where the CIs are evaluated,
+#' \code{CI_beta_j.lower} and \code{CI_beta_j.upper} --- the lower and upper bounds of the CIs 
+#' for the intercept function on \code{CIgrid} for \eqn{j = 1,2,\dots}.}
+#' 
 #' \item{CI_R2}{CI the time-varying \eqn{R^2(t)} --- A data frame holding three variables: 
-#' \code{CIgrid} --- the time grid where the CIs are evaluated --- this is same as the input \code{tGrid}; 
-#' \code{CI_R2.lower} and \code{CI_R2.upper} --- the lower and upper bounds of the CIs for the time-varying \eqn{R^2(t)} on \code{CIgrid}.}
-#' \item{level}{The confidence level of the CIs}.
+#' \code{CIgrid} --- the time grid where the CIs are evaluated,
+#' \code{CI_R2.lower} and \code{CI_R2.upper} --- the lower and upper bounds of the CIs 
+#' for the time-varying \eqn{R^2(t)} on \code{CIgrid}.}
+#' 
+#' \item{level}{The confidence level of the CIs.}
 #' }
 #' @examples 
 #' set.seed(1)
@@ -48,13 +54,17 @@
 #' beta1a = beta1$CI_beta1.lower
 #' beta1b = beta1$CI_beta1.upper
 #' true_beta = beta[1,]  ##extracting true coef beta1 in the simulation setting
-#' est_beta = smres$beta[1,] ## ##extracting estimated coef beta1 from fitting the concurrent regression model
+#' est_beta = smres$beta[1,] ## ##extracting estimated coef beta1 from 
+#' ###fitting the concurrent regression model
 #' plot(beta1$CIgrid, beta1a, type= 'l', ylim = c(0,2)) ##plot of lower CI for beta1
 #' lines(beta1$CIgrid, beta1b) ##plot of lower CI for beta1
-#' lines(beta1$CIgrid, true_beta, col ='red')  ##plot of true coef beta1 in the simulation setting
-#' lines(beta1$CIgrid, est_beta, col ='blue') ##plot of estimated coef beta1 from fitting the concurrent regression model
+#' lines(beta1$CIgrid, true_beta, col ='red')  
+#' ##plot of true coef beta1 in the simulation setting
+#' lines(beta1$CIgrid, est_beta, col ='blue') 
+#' ##plot of estimated coef beta1 from fitting the concurrent regression model
 #' @export
 
+#utils::globalVariables(c("prob", "section", "y"))
 GetCI_Dense <- function(dat, tGrid, level = 0.95, R = 10, bw, kernel_type){
   if (length(level) > 1) {
     level = level[1]

@@ -201,5 +201,5 @@ test_that('functional history index model simulated setting works (accurate esti
   eps2=sum((beta_0(Fit_result$workGridY) - Fit_result$beta0)^2) / sum((beta_0(Fit_result$workGridY))^2)
   eps3=sum((gamma_u(Fit_result$workGridLag[[1]]) - Fit_result$gamma[[1]])^2) / sum((gamma_u(Fit_result$workGridLag[[1]]))^2)
   
-  expect_equal(eps1<=1e-1 & eps2<=1e-1 & eps3<=1e-1, TRUE)
+  expect_equal(eps1<=.5 & eps2<=1e-1 & eps3<=1e-1, TRUE)
 })

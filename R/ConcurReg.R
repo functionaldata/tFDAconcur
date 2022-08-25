@@ -64,7 +64,8 @@
 #' set.seed(1)
 #' Ysp <- fdapace::Sparsify(Y, T, sparsity)
 #' vars <- list(X_1=X_1sp, Z_2=Z[, 2], Y=Ysp)
-#' res2 <- ConcurReg(vars, outGrid, userBwMu = .5, userBwCov=.5,  kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE)
+#' res2 <- ConcurReg(vars, outGrid, userBwMu = .5, userBwCov=.5,  kern='gauss',
+#'  measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE)
 #' @references
 #' \itemize{
 #' \item \cite{Yao, F., Müller, H.G., Wang, J.L. "Functional Linear Regression Analysis for Longitudinal Data." Annals of Statistics 33, (2005): 2873-2903.(Dense data)} 
@@ -109,7 +110,7 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
   )
   l <- max(unlist(lapply(temp, function(v){return(v[1])})))
   u <- min(unlist(lapply(temp, function(v){return(v[2])})))
-  grid.index <- which((outGrid > l) & (outGrid < u))
+  grid.index <- which((outGrid >= l) & (outGrid <= u))
   grid.full <- outGrid
   outGrid <- outGrid[grid.index]
   
@@ -175,7 +176,7 @@ demean <- function(vars, userBwMu, kern) {
       Tin <- sort(unique(unlist(x[['Lt']])))
       
       if(is.null(userBwMu)){ # bandwidth choice for mean function is using GCV
-        optns <- fdapace:::SetOptions(x[['Ly']], x[['Lt']], list(userBwMu=userBwMu, methodBwMu ='GCV', kernel=kern))
+        optns <- fdapace::SetOptions(x[['Ly']], x[['Lt']], list(userBwMu=userBwMu, methodBwMu ='GCV', kernel=kern))
         xmu <- fdapace:::GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1], optns)[['mu']]
       } else{
         xmu <- fdapace:::GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1],
@@ -281,7 +282,7 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
     if (center) {
       
       if(is.null(userBwCov)){ # bandwidth choice for mean function is using GCV
-        optns <- fdapace:::SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
+        optns <- fdapace::SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
         Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1], optns)[['mu']]
       } else{
         Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1],
@@ -292,8 +293,8 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
       Xmu <- rep(0, length(Tin))
       Ymu <- 0
     }
-    res <- fdapace:::GetCrCovYZ(userBwCov, Y, Ymu, X[['Ly']], X[['Lt']], Xmu, Tin, kern)[['smoothedCC']]
-    res <- as.matrix(fdapace:::ConvertSupport(Tin, outGrid, mu=res))
+    res <- fdapace::GetCrCovYZ(userBwCov, Y, Ymu, X[['Ly']], X[['Lt']], Xmu, Tin, kern)[['smoothedCC']]
+    res <- as.matrix(fdapace::ConvertSupport(Tin, outGrid, mu=res))
     #res <- as.matrix(res)
     if (flagScalerFunc) 
       res <- t(res)
@@ -311,7 +312,7 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
         stop('Observation time points coverage too low')
       
       if(is.null(userBwCov)){ # bandwidth choice for mean function is using GCV
-        optns <- fdapace:::SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
+        optns <- fdapace::SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
         Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1], optns)[['mu']]
       } else{
         Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1],
@@ -319,7 +320,7 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
       }
       
       if(is.null(userBwCov)){
-        optns <- fdapace:::SetOptions(Y[['Ly']], Y[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
+        optns <- fdapace::SetOptions(Y[['Ly']], Y[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
         Ymu <- fdapace:::GetSmoothedMeanCurve(Y[['Ly']], Y[['Lt']], TinX, TinX[1], optns)[['mu']]
       }else{
         Ymu <- fdapace:::GetSmoothedMeanCurve(Y[['Ly']], Y[['Lt']], TinY, TinY[1], list(userBwMu=userBwCov, kernel=kern))[['mu']]
@@ -348,24 +349,24 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
       Ycent <- Yvec - Ymu[as.character(tvecX)]
       
       if(is.null(userBwCov)){
-        optns <- fdapace:::SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
+        optns <- fdapace::SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
         bw_mu =  unlist(fdapace:::GCVLwls1D1(yy = Xcent * Ycent, tt = tvecX, kernel = kern, npoly = 1, nder = 0, dataType = optns$dataType) )[1] 
-        covXY <- fdapace::Lwls1D(userBwCov=bw_mu, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
+        covXY <- fdapace::Lwls1D(bw=bw_mu, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
       }else{
-        covXY <- fdapace::Lwls1D(userBwCov=userBwCov, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
+        covXY <- fdapace::Lwls1D(bw=userBwCov, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
       }
       
       res <- matrix(NA, noutGrid, noutGrid)
       diag(res) <- covXY
     } else { # use 2D smoothing
       
-      tmp <- fdapace:::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
+      tmp <- fdapace::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
                                   Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern, bwRoutine = 'grid-search')
       # if(snippet){
-      #   tmp <- fdapace:::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
+      #   tmp <- fdapace::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
       #                   Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern, bwRoutine = 'grid-search')
       # }else{
-      #   tmp <- fdapace:::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
+      #   tmp <- fdapace::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
       #                     Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern)
       # }
       

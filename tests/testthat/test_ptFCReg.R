@@ -5,7 +5,7 @@ test_that("The field in dat for the response is not a matrix.", {
   tGrid <- seq(0, 1, length.out=nGridIn) # Functional data support
   Z1 <- tGrid
   beta0 <- 0
-  dat <- list(Y = beta0 + Z1 + rnorm(n), Z1=Z1)
+  dat <- list(Y = beta0 + Z1 + rnorm(nGridIn), Z1=Z1)
   expect_error(ptFCReg(tGrid = tGrid, dat = dat),
                "The field in dat for the response is not a matrix.")
 })

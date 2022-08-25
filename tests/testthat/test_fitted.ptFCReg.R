@@ -20,7 +20,7 @@ test_that("Works with objects returned by ptFCReg", {
   dat <- list(X1=X_1, Z1=Z[, 2], Y=Y)
   res <- ptFCReg(tGrid = tGrid, dat = dat)
   smres <- smPtFCRegCoef(res, bw = 2.5 / (nGridIn-1), kernel_type = 'epan')
-  fit_res <- fitted(res)
+  fit_res <- fitted.ptFCReg(res)
   expect_lt( max(sqrt(apply( (fit_res - EYgivenX)^2, 1, pracma::trapz, x = tGrid))), 0.15)
 })
 
@@ -45,6 +45,6 @@ test_that("Works with objects returned by smPtFCRegCoef", {
   dat <- list(X1=X_1, Z1=Z[, 2], Y=Y)
   res <- ptFCReg(tGrid = tGrid, dat = dat)
   smres <- smPtFCRegCoef(res, bw = 2.5 / (nGridIn-1), kernel_type = 'epan')
-  fit_smres <- fitted(smres)
+  fit_smres <- fitted.ptFCReg(smres)
   expect_lt( max(sqrt(apply( (fit_smres - EYgivenX)^2, 1, pracma::trapz, x = tGrid))), 0.15)
 })
