@@ -42,12 +42,12 @@ License: BSD_3_clause + file LICENSE
 LazyData: false
 Imports:
     fdapace,
+    stats
+Suggests: 
     MASS,
+    Rcpp (>= 0.11.5),
     Matrix,
     pracma,
     numDeriv,
-    stats,
-    Rcpp (>= 0.11.5)
-Suggests: 
     testthat
 RoxygenNote: 7.2.1
