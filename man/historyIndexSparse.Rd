@@ -30,10 +30,10 @@ Functional history index model for functional responses and functional predictor
 }
 \details{
 The functional history index model is defined as 
-\deqn{E[Y(t)|X_1(t), \cdots, X_p(t)] = \beta_0(t) + \sum_{j=1}^p\beta_j(t)\int_0^{\Delta_j}\gamma_j(s)X_j(t-s)ds} 
+\eqn{E[Y(t)|X_1(t), \cdots, X_p(t)] = \beta_0(t) + \sum_{j=1}^p\beta_j(t)\int_0^{\Delta_j}\gamma_j(s)X_j(t-s)ds} 
 for \eqn{t\in[\max_j\{\Delta_j\}, T]} with a suitable \eqn{T>0}. 
-Write \eqn{\alpha_j(t, s)=\beta_j(t)\gamma_j(s). It becomes 
-\deqn{E[Y(t)|X_1(t), \cdots, X_p(t)] = \beta_0(t) + \sum_{j=1}^p\int_0^{\Delta_j}\alpha_j(t, s)X_j(t-s)ds}}. 
+Write \eqn{\alpha_j(t, s)=\beta_j(t)\gamma_j(s)}. It becomes 
+\eqn{E[Y(t)|X_1(t), \cdots, X_p(t)] = \beta_0(t) + \sum_{j=1}^p\int_0^{\Delta_j}\alpha_j(t, s)X_j(t-s)ds}. 
 For more details we refer to 
 \cite{Şentürk, D. and Müller, H.G., (2010). Functional varying coefficient models for longitudinal data. Journal of the American Statistical Association, 105(491), pp.1256-1264.}
 }

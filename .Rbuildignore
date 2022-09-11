@@ -3,3 +3,4 @@
 ^tests$
 ^cran-comments\.md$
 ^inst/testdata$
+^CRAN-SUBMISSION$

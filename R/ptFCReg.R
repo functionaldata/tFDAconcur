@@ -84,7 +84,7 @@ ptFCReg <- function(tGrid, dat) {
   })
   
   Lmod <- lapply(Ldf, function(df) {
-    lm( Y ~ ., data = df )
+    stats::lm( Y ~ ., data = df )
   })
   coef <- sapply(Lmod, coef)
   R2 <- sapply(Lmod, function(mod) summary(mod)$r.sq)
@@ -140,7 +140,7 @@ ptFCReg <- function(tGrid, dat) {
 #   })
 #   
 #   Lmod <- lapply(Ldf, function(df) {
-#     lm( Y ~ ., data = df )
+#     stats::lm( Y ~ ., data = df )
 #   })
 #   coef <- sapply(Lmod, coef)
 #   R2 <- sapply(Lmod, function(mod) summary(mod)$r.sq)

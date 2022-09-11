@@ -130,7 +130,7 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
   rownames(beta) <- names(vars)[-length(vars)]
   
   # coefficient of determination: 
-  #   R2 = cov(X, Y)' var(X)^{-1} cov(X, Y) / var(Y)
+  #   R2 = stats::cov(X, Y)' var(X)^{-1} stats::cov(X, Y) / var(Y)
   R2 <- sapply(seq_len(dim(allCov)[1]), function(i) {
     tmpCov <- allCov[i, i, , ]
     tmpCov[p + 1, 1:p, drop=FALSE] %*% beta[, i, drop=FALSE] / tmpCov[p + 1, p + 1]
@@ -183,8 +183,8 @@ demean <- function(vars, userBwMu, kern) {
                                               list(userBwMu=userBwMu, kernel=kern))[['mu']]
       }
       
-      #muFun <- approxfun(Tin, xmu)
-      muFun <- approxfun(Tin, xmu, rule=2)
+      #muFun <- stats::approxfun(Tin, xmu)
+      muFun <- stats::approxfun(Tin, xmu, rule=2)
       x[['Ly']] <- lapply(1:length(x[['Ly']]), function(i)
         x[['Ly']][[i]]- muFun(x[['Lt']][[i]]))
       xmu <- muFun
@@ -240,12 +240,12 @@ MvCov <- function(vars, userBwCov, outGrid, kern, measurementError=TRUE, center,
         if (attr(covRes, 'covType') %in% c('FF', 'SS'))
           res[, , i, j] <- covRes
         else {
-          if (nrow(covRes) == 1)   # cov(scalar, function)
+          if (nrow(covRes) == 1)   # stats::cov(scalar, function)
             res[, , i, j] <- matrix(covRes, lenoutGrid, lenoutGrid, byrow=TRUE)
-          else                     # cov(function, scalar)
+          else                     # stats::cov(function, scalar)
             res[, , i, j] <- matrix(covRes, lenoutGrid, lenoutGrid, byrow=FALSE)
         }
-      } else { # fill up the symmetric cov(y, x)
+      } else { # fill up the symmetric stats::cov(y, x)
         res[, , i, j] <- t(res[, , j, i])
       }
     }
@@ -273,7 +273,7 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
   
   # Scalar-scalar
   if (!is.list(X) && !is.list(Y)) {
-    res <- cov(X, Y)
+    res <- stats::cov(X, Y)
     attr(res, 'covType') <- 'SS'
     
     # Scalar-function    
@@ -361,7 +361,7 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
     } else { # use 2D smoothing
       
       tmp <- fdapace::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
-                                  Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern, bwRoutine = 'grid-search')
+                                 Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern, bwRoutine = 'grid-search')
       # if(snippet){
       #   tmp <- fdapace::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
       #                   Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern, bwRoutine = 'grid-search')
@@ -412,8 +412,8 @@ imputeConReg <- function(FPCAlist, Z, outGrid) {
     Yname <- names(FPCAlist)[length(FPCAlist)]
   
   imputeCurves <- sapply(FPCAlist, function(x) 
-    apply(fitted(x), 1, function(fit) 
-      approx(x[['workGrid']], fit, outGrid)[['y']]),
+    apply(stats::fitted(x), 1, function(fit) 
+      stats::approx(x[['workGrid']], fit, outGrid)[['y']]),
     simplify='array')
   alphaBeta <- apply(imputeCurves, 1, function(XYt) {
     Yt <- XYt[, ncol(XYt)]

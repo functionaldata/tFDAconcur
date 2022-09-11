@@ -93,19 +93,19 @@ GetCI_Dense <- function(dat, tGrid, level = 0.95, R = 10, bw, kernel_type){
   })
   CI_beta0 = apply(t(sapply(1:R, function(b){
     betaMat[[b]]$beta0
-  })), 2, quantile, c((1-level)/2, 1-(1-level)/2))
+  })), 2, stats::quantile, c((1-level)/2, 1-(1-level)/2))
   CI_beta0 = data.frame(CI_beta0.lower = CI_beta0[1,], CI_beta0.upper = CI_beta0[2,], CIgrid = tGrid)
   CI_beta = lapply(1:(length(dat)-1), function(j){
     ci_beta_df =  data.frame( t(apply(t(sapply(1:R, function(b){
       betaMat[[b]]$beta[j,]
-      })), 2, quantile, c((1-level)/2, 1-(1-level)/2))))
+      })), 2, stats::quantile, c((1-level)/2, 1-(1-level)/2))))
     names(ci_beta_df) =  c( sprintf("CI_beta%d.lower", j)  ,sprintf("CI_beta%d.upper", j)) 
     ci_beta_df$CIgrid = tGrid
     return(ci_beta_df)
   })
   CI_R2 = apply(t(sapply(1:R, function(b){
     betaMat[[b]]$R2 
-  })), 2, quantile, c((1-level)/2, 1-(1-level)/2))
+  })), 2, stats::quantile, c((1-level)/2, 1-(1-level)/2))
   CI_R2 = data.frame(CI_R2.lower = CI_R2[1,], CI_R2.upper = CI_R2[2,], CIgrid = tGrid)
   return(list(CI_beta0 = CI_beta0, CI_beta = CI_beta, CI_R2 = CI_R2,
               level = level))
