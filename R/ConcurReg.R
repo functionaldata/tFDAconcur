@@ -35,13 +35,13 @@
 #' #
 #' # Settings
 #' set.seed(1)
-#' n <- 75
-#' nGridIn <- 150
+#' n <- 30
+#' nGridIn <- 100
 #' sparsity <- 5:10 # Sparse data sparsity
 #' T <- round(seq(0, 1, length.out=nGridIn), 4) # Functional data support
 #' bw <- 0.1
 #' outGrid <- round(seq(min(T), 1, by=0.05), 2)
-#' 
+#'  outGrid <- seq(min(T), max(T), by=0.05)
 #' # Simulate functional data
 #' mu <- T * 2 # mean function for X_1
 #' sigma <- 1
@@ -73,6 +73,7 @@
 #' \item \cite{Sentürk, D., Nguyen, D.V. "Varying Coefficient Models for Sparse Noise-contaminated Longitudinal Data", Statistica Sinica 21(4), (2011): 1831-1856. (Sparse data)} 
 #' }
 #' @export
+
 
 
 
@@ -110,7 +111,7 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
   )
   l <- max(unlist(lapply(temp, function(v){return(v[1])})))
   u <- min(unlist(lapply(temp, function(v){return(v[2])})))
-  grid.index <- which((outGrid >= l) & (outGrid <= u))
+  grid.index <- which((outGrid > l) & (outGrid < u))
   grid.full <- outGrid
   outGrid <- outGrid[grid.index]
   
@@ -160,8 +161,8 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
   allCov.full <- array(NA, c(length(grid.full), length(grid.full), dim(allCov)[3], dim(allCov)[4]))
   allCov.full[grid.index, grid.index,,] <- allCov
   
-  #res <- list(beta=beta, beta0 = beta0, outGrid=outGrid, cov=allCov, R2=R2, n=n)
-  res <- list(beta=beta.full, beta0 = beta0.full, outGrid=grid.full, cov=allCov.full, R2=R2, n=n)
+  res <- list(beta=beta, beta0 = beta0, outGrid=outGrid, cov=allCov, R2=R2, n=n)
+  #res <- list(beta=beta.full, beta0 = beta0.full, outGrid=grid.full, cov=allCov.full, R2=R2, n=n)
   if (!returnCov)
     res[['cov']] <- NULL
   res

@@ -47,8 +47,8 @@
 #' @examples 
 #'
 #' set.seed(1)
-#' n <- 75
-#' nGridIn <- 150
+#' n <- 30
+#' nGridIn <- 100
 #' sparsity <- 5:10 # Sparse data sparsity
 #' T <- round(seq(0, 1, length.out=nGridIn), 4) # Functional data support
 #' bw <- 0.1
@@ -72,11 +72,8 @@
 #' # Sparsify functional data
 #' set.seed(1)
 #' X_1sp <- fdapace::Sparsify(X_1, T, sparsity)
-#' set.seed(1)
 #' Ysp <- fdapace::Sparsify(Y, T, sparsity)
 #' vars <- list(X_1=X_1sp, Z_2=Z[, 2], Y=Ysp)
-#' est = ConcurReg(vars, outGrid, userBwMu = .5, userBwCov=.5,  kern='gauss', 
-#' measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE)
 #' res <-  GetCI_Sparse(vars, outGrid, level = 0.95, R = 10, 
 #'                              userBwMu = .5, userBwCov = .5,  
 #'                              kern='gauss', measurementError=TRUE, diag1D='none',
@@ -95,6 +92,7 @@ GetCI_Sparse = function(vars, outGrid, level = 0.95, R = 10, userBwMu = .5, user
   if (R %% 1 != 0 | R < 0) {
     stop("R should be an positive integer.")
   }
+  
   n <- lengthVars(vars)
   p <- length(vars) - 1
   betaMat <- lapply(1:R, function(b) {
@@ -107,21 +105,24 @@ GetCI_Sparse = function(vars, outGrid, level = 0.95, R = 10, userBwMu = .5, user
         vars[[j]] = vars[[j]][ind]
       }
     }
-    #res2 <- ConcurReg(vars, outGrid, userBwMu = .5, userBwCov=.5,  kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE)
+    #res <- ConcurReg(vars, outGrid, userBwMu = .5, userBwCov=.5,  kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE)
     res <- ConcurReg(vars, outGrid, userBwMu = userBwMu, userBwCov = userBwCov,  kern = kern,
            measurementError = measurementError, diag1D = diag1D, useGAM = useGAM , returnCov = returnCov)
+    length(res$beta0)
     return(list(beta0 = res$beta0, beta = res$beta, R2 = res$R2, outGrid = res$outGrid))
   })
-  
+
   
   CI_beta0 = apply(t(sapply(1:R, function(b){
-    betaMat[[b]]$beta0
-  }, simplify = TRUE)), 2, stats::quantile, c((1-level)/2, 1-(1-level)/2))
+    betaMat[[b]]$beta0[ complete.cases(betaMat[[b]]$beta0)]
+  }, simplify = TRUE)), 2,
+    stats::quantile, c((1-level)/2, 1-(1-level)/2))
+  
   
   CI_beta0 = data.frame(CI_beta0.lower = CI_beta0[1,], CI_beta0.upper = CI_beta0[2,], CIgrid = betaMat[[1]]$outGrid)
   CI_beta = lapply(1:p, function(j){
     ci_beta_df =  data.frame( t(apply(t(sapply(1:R, function(b){
-      betaMat[[b]]$beta[j,]
+      betaMat[[b]]$beta[j,][ complete.cases(betaMat[[b]]$beta[j,])]
     })), 2, stats::quantile, c((1-level)/2, 1-(1-level)/2))))
     names(ci_beta_df) =  c( sprintf("CI_beta%d.lower", j)  ,sprintf("CI_beta%d.upper", j)) 
     ci_beta_df$CIgrid = betaMat[[1]]$outGrid
@@ -130,11 +131,11 @@ GetCI_Sparse = function(vars, outGrid, level = 0.95, R = 10, userBwMu = .5, user
   names(CI_beta) = sapply(1:p, function(j) { sprintf("CI_beta%d", j)})
   
   CI_R2 = apply(t(sapply(1:R, function(b){
-    betaMat[[b]]$R2 
+    betaMat[[b]]$R2[complete.cases(betaMat[[b]]$R2)]
   })), 2, stats::quantile, c((1-level)/2, 1-(1-level)/2))
   CI_R2 = data.frame(CI_R2.lower = CI_R2[1,], CI_R2.upper = CI_R2[2,], CIgrid = betaMat[[1]]$outGrid)
   return(list(CI_beta0 = CI_beta0, CI_beta = CI_beta, CI_R2 = CI_R2,
-              level = level))
+              outGrid = outGrid, level = level))
   
 }
 
