@@ -149,8 +149,8 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
   beta0 <- muList[[Yname]](outGrid) - colSums(t(muBeta))
   
   ## enlarge output
-  beta0.full <- length(grid.full)
-  beta0.full <- beta0[grid.index]
+  beta0.full <- rep(NA,length(grid.full))
+  beta0.full[grid.index] <- beta0
   if(is.vector(beta)){
     beta.full <- rep(NA, length(grid.full))
     beta.full[grid.index] <- beta
@@ -161,8 +161,8 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
   allCov.full <- array(NA, c(length(grid.full), length(grid.full), dim(allCov)[3], dim(allCov)[4]))
   allCov.full[grid.index, grid.index,,] <- allCov
   
-  res <- list(beta=beta, beta0 = beta0, outGrid=outGrid, cov=allCov, R2=R2, n=n)
-  #res <- list(beta=beta.full, beta0 = beta0.full, outGrid=grid.full, cov=allCov.full, R2=R2, n=n)
+  #res <- list(beta=beta, beta0 = beta0, outGrid=outGrid, cov=allCov, R2=R2, n=n)
+  res <- list(beta=beta.full, beta0 = beta0.full, outGrid=outGrid, cov=allCov.full, R2=R2, n=n)
   if (!returnCov)
     res[['cov']] <- NULL
   res

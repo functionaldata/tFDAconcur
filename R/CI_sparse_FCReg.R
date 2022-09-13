@@ -74,14 +74,14 @@
 #' X_1sp <- fdapace::Sparsify(X_1, T, sparsity)
 #' Ysp <- fdapace::Sparsify(Y, T, sparsity)
 #' vars <- list(X_1=X_1sp, Z_2=Z[, 2], Y=Ysp)
-#' res <-  GetCI_Sparse(vars, outGrid, level = 0.95, R = 10, 
-#'                              userBwMu = .5, userBwCov = .5,  
+#' res <-  GetCI_Sparse(vars, outGrid, level = 0.95, R = 2, 
+#'                              userBwMu = .1, userBwCov = .1,  
 #'                              kern='gauss', measurementError=TRUE, diag1D='none',
 #'                              useGAM = FALSE, returnCov=TRUE)
 #' @export
 
-GetCI_Sparse = function(vars, outGrid, level = 0.95, R = 10, userBwMu = .5, userBwCov=.5,  
-                        kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE){
+GetCI_Sparse = function(vars, outGrid, level = 0.95, R , userBwMu, userBwCov,  
+                        kern, measurementError, diag1D, useGAM, returnCov){
   if (length(level) > 1) {
     level = level[1]
     warning("The input level has more than 1 element; only the first one is used.")
@@ -112,7 +112,6 @@ GetCI_Sparse = function(vars, outGrid, level = 0.95, R = 10, userBwMu = .5, user
     return(list(beta0 = res$beta0, beta = res$beta, R2 = res$R2, outGrid = res$outGrid))
   })
 
-  
   CI_beta0 = apply(t(sapply(1:R, function(b){
     betaMat[[b]]$beta0[ complete.cases(betaMat[[b]]$beta0)]
   }, simplify = TRUE)), 2,

@@ -1,8 +1,4 @@
-
-
-library(MASS)
-library(fdapace)
-library(testthat)
+#library(testthat)
 # devtools::load_all()
 
 test_that('Simple dense case works', {
@@ -25,14 +21,18 @@ test_that('Simple dense case works', {
   kern <- 'epan'
   res = ConcurReg(vars, T, measurementError=FALSE)
   resN = ConcurReg(vars, T, measurementError=TRUE)
-  # res <- FCReg(vars, bw, bw, T, kern, measurementError=FALSE)
-  # resN <- FCReg(vars, bw, bw, T, kern, measurementError=TRUE)
-   # plot(pts, res$beta); abline(a=0, b=1)
+  # plot(pts, res$beta); abline(a=0, b=1)
   # plot(pts, resN$beta); abline(a=0, b=1)
-  expect_equal(as.numeric(res$beta), pts, scale=1, tolerance=0.1)
-  expect_equal(as.numeric(resN$beta), pts, scale=1, tolerance=0.1)
+  res$beta = as.numeric(res$beta)
+  resN$beta = as.numeric(resN$beta)
+  pos = !is.na(res$beta)
+  posN = !is.na(resN$beta)
+  res$beta = res$beta[complete.cases(res$beta)]
+  resN$beta = resN$beta[complete.cases(resN$beta)]
+  expect_equal(res$beta, pts[pos], scale=1, tolerance=0.1)
+  expect_equal(resN$beta, pts[posN], scale=1, tolerance=0.1)
   # Assume noise is better than no noise
-  expect_lt(mean((as.numeric(resN$beta) - pts)^2), mean((as.numeric(res$beta) - pts)^2)) 
+  expect_lt(mean((resN$beta - pts[posN])^2), mean((res$beta - pts[pos])^2)) 
 })
 
 # Y(t) = \beta_0(t) + \beta_1(t) X_1(t) + \beta_2(t) X_2(t) + \beta_3 Z_3 + \beta_4 Z_4 + \epsilon
@@ -61,7 +61,7 @@ beta_2 <- 1
 beta_3 <- 1
 beta_4 <- 1
 
-Z <- mvrnorm(n, rep(0, 4), Sigma)
+Z <- MASS::mvrnorm(n, rep(0, 4), Sigma)
 X_1 <- Z[, 1, drop=FALSE] %*% matrix(1, 1, nGridIn) + matrix(mu, n, nGridIn, byrow=TRUE)
 X_2 <- Z[, 2, drop=FALSE] %*% matrix(sqrt(2) * cos(pi * T), 1, nGridIn) - matrix(mu, n, nGridIn, byrow=TRUE)
 # tmp <- cov(X_1, X_2); colMeans(tmp)
@@ -164,7 +164,9 @@ expect_error(ConcurReg(vars, outGrid, bw, bw,  measurementError=TRUE, diag1D='al
 
 test_that('1D and 2D covariance estimates are similar', {
   expect_true(sqrt(mean(
-    (withError2D[['beta']] - withError1D[['beta']])^2, 
+    (withError2D[['beta']][,-which(colSums(is.na(withError2D[['beta']]))>0)] -
+       withError1D[['beta']][,-which(colSums(is.na(withError1D[['beta']]))>0)]
+    )^2, 
     trim=0.2)) < 0.2)
   expect_equal(noError2D[['beta']], noError1D[['beta']], tolerance=0.1)
 })
@@ -180,7 +182,8 @@ noError1DEpan <- ConcurReg(vars, outGrid, bw,bw, measurementError=FALSE, diag1D=
 
 test_that('Different kernel type works', {
   expect_true(sqrt(mean(
-    (withError2DRect[['beta']] - withError1DRect[['beta']])^2, 
+    (withError2DRect[['beta']][,-which(colSums(is.na(withError2DRect[['beta']]))>0)] - 
+       withError1DRect[['beta']][,-which(colSums(is.na(withError1DRect[['beta']]))>0)])^2, 
     trim=0.2)) < 0.2)
   expect_equal(noError2DRect[['beta']], noError2D[['beta']], tolerance=0.2)
   expect_equal(noError1DRect[['beta']], noError1D[['beta']], tolerance=0.2)
@@ -245,9 +248,9 @@ test_that('Test based on previous implementation: simple concurrent regression w
   
   Q <- ConcurReg(vars, outGrid, 0.5,0.5, kern = 'epan', measurementError=FALSE)
   
-  expect_equal( 2.5, mean(Q$beta[2,]) , tol= 0.04 )
-  expect_gt( cor( Q$beta0, 0.2*s), 0.95) # this should be change to beta0 at some point.
-  expect_gt( cor(Q$beta[1,], as.vector(betaFunc1)), 0.99)
+  expect_equal( 2.5, mean(Q$beta[2,][!is.na(Q$beta[2,])]) , tol= 0.04 )
+  expect_gt( cor( Q$beta0[!is.na(Q$beta0)], 0.2*s[!is.na(Q$beta0)]), 0.95) # this should be change to beta0 at some point.
+  expect_gt( cor(Q$beta[1,][!is.na(Q$beta[1,])], as.vector(betaFunc1)[!is.na(Q$beta[1,])]), 0.99)
 })
 
 test_that("Works with bandwidth selection returned by ConcurReg", {
@@ -279,7 +282,7 @@ test_that("Works with bandwidth selection returned by ConcurReg", {
   l1 <- sqrt(mean((!is.na(withError2D$beta0))^2))
   l2 <- sqrt(mean((!is.na(withError2D$beta[1,]-1)^2)))
   l3 <- sqrt(mean((!is.na(withError2D$beta[2,]-1)^2)))
-  expect_lt( max(c(l1, l2, l3)), 1.5)
+  expect_lt( max(c(l1, l2, l3)), 1)
 })
 
 

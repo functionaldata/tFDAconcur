@@ -8,14 +8,14 @@ GetCI_Sparse(
   vars,
   outGrid,
   level = 0.95,
-  R = 10,
-  userBwMu = 0.5,
-  userBwCov = 0.5,
-  kern = "gauss",
-  measurementError = TRUE,
-  diag1D = "none",
-  useGAM = FALSE,
-  returnCov = TRUE
+  R,
+  userBwMu,
+  userBwCov,
+  kern,
+  measurementError,
+  diag1D,
+  useGAM,
+  returnCov
 )
 }
 \arguments{
@@ -83,8 +83,8 @@ WARNING! For very sparse functional data, setting measurementError = TRUE is not
 \examples{
 
 set.seed(1)
-n <- 75
-nGridIn <- 150
+n <- 30
+nGridIn <- 100
 sparsity <- 5:10 # Sparse data sparsity
 T <- round(seq(0, 1, length.out=nGridIn), 4) # Functional data support
 bw <- 0.1
@@ -108,11 +108,8 @@ for (i in seq_len(n)) {
 # Sparsify functional data
 set.seed(1)
 X_1sp <- fdapace::Sparsify(X_1, T, sparsity)
-set.seed(1)
 Ysp <- fdapace::Sparsify(Y, T, sparsity)
 vars <- list(X_1=X_1sp, Z_2=Z[, 2], Y=Ysp)
-est = ConcurReg(vars, outGrid, userBwMu = .5, userBwCov=.5,  kern='gauss', 
-measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE)
 res <-  GetCI_Sparse(vars, outGrid, level = 0.95, R = 10, 
                              userBwMu = .5, userBwCov = .5,  
                              kern='gauss', measurementError=TRUE, diag1D='none',

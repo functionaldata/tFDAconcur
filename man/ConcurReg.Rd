@@ -65,13 +65,13 @@ WARNING! For very sparse functional data, setting measurementError = TRUE is not
 #
 # Settings
 set.seed(1)
-n <- 75
-nGridIn <- 150
+n <- 30
+nGridIn <- 100
 sparsity <- 5:10 # Sparse data sparsity
 T <- round(seq(0, 1, length.out=nGridIn), 4) # Functional data support
 bw <- 0.1
 outGrid <- round(seq(min(T), 1, by=0.05), 2)
-
+ outGrid <- seq(min(T), max(T), by=0.05)
 # Simulate functional data
 mu <- T * 2 # mean function for X_1
 sigma <- 1
