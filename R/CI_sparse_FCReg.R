@@ -113,7 +113,7 @@ GetCI_Sparse = function(vars, outGrid, level = 0.95, R , userBwMu, userBwCov,
   })
 
   CI_beta0 = apply(t(sapply(1:R, function(b){
-    betaMat[[b]]$beta0[ complete.cases(betaMat[[b]]$beta0)]
+    betaMat[[b]]$beta0[ stats::complete.cases(betaMat[[b]]$beta0)]
   }, simplify = TRUE)), 2,
     stats::quantile, c((1-level)/2, 1-(1-level)/2))
   
@@ -121,7 +121,7 @@ GetCI_Sparse = function(vars, outGrid, level = 0.95, R , userBwMu, userBwCov,
   CI_beta0 = data.frame(CI_beta0.lower = CI_beta0[1,], CI_beta0.upper = CI_beta0[2,], CIgrid = betaMat[[1]]$outGrid)
   CI_beta = lapply(1:p, function(j){
     ci_beta_df =  data.frame( t(apply(t(sapply(1:R, function(b){
-      betaMat[[b]]$beta[j,][ complete.cases(betaMat[[b]]$beta[j,])]
+      betaMat[[b]]$beta[j,][ stats::complete.cases(betaMat[[b]]$beta[j,])]
     })), 2, stats::quantile, c((1-level)/2, 1-(1-level)/2))))
     names(ci_beta_df) =  c( sprintf("CI_beta%d.lower", j)  ,sprintf("CI_beta%d.upper", j)) 
     ci_beta_df$CIgrid = betaMat[[1]]$outGrid
@@ -130,7 +130,7 @@ GetCI_Sparse = function(vars, outGrid, level = 0.95, R , userBwMu, userBwCov,
   names(CI_beta) = sapply(1:p, function(j) { sprintf("CI_beta%d", j)})
   
   CI_R2 = apply(t(sapply(1:R, function(b){
-    betaMat[[b]]$R2[complete.cases(betaMat[[b]]$R2)]
+    betaMat[[b]]$R2[stats::complete.cases(betaMat[[b]]$R2)]
   })), 2, stats::quantile, c((1-level)/2, 1-(1-level)/2))
   CI_R2 = data.frame(CI_R2.lower = CI_R2[1,], CI_R2.upper = CI_R2[2,], CIgrid = betaMat[[1]]$outGrid)
   return(list(CI_beta0 = CI_beta0, CI_beta = CI_beta, CI_R2 = CI_R2,
