@@ -14,9 +14,9 @@
 #' @param kern Smoothing kernel choice, common for mu and covariance; 
 #' "rect", "gauss", "epan", "gausvar", "quar" (default: "gauss")
 #' @param measurementError Indicator measurement errors on the functional observations 
-#' should be assumed. If TRUE the diagonal raw covariance will be removed when smoothing. (default: TRUE)
+#' should be assumed. If TRUE the diagonal raw covariance will be removed when smoothing. (default: FALSE)
 #' @param diag1D  A string specifying whether to use 1D smoothing for the diagonal line of the covariance. 
-#' 'none': don't use 1D smoothing; 'cross': use 1D only for cross-covariances; 'all': use 1D for both auto- and cross-covariances. (default : 'none')
+#' 'none': don't use 1D smoothing; 'all': use 1D for both auto- and cross-covariances. (default : 'all')
 #' @param useGAM Indicator to use gam smoothing instead of local-linear smoothing (semi-parametric option) (default: FALSE)
 #' @param returnCov Indicator to return the covariance surfaces, which is a four dimensional array. The first two dimensions correspond to outGrid
 #'  and the last two correspond to the covariates and the response, i.e. (i, j, k, l) entry being Cov(X_k(t_i), X_l(t_j)) (default: FALSE)
@@ -75,11 +75,10 @@
 #' @export
 
 
-
-
-ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss', measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE) {
+ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss', 
+                      measurementError=FALSE, diag1D='all', useGAM = FALSE, returnCov=TRUE) {
   
-  n <- lengthVars(vars)
+  n <- fdaconcur:::lengthVars(vars)
   p <- length(vars) - 1
   if (p == 0)
     stop('Too few covariates.')
@@ -109,18 +108,37 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
       return(range(unlist(v[['Lt']])))
     }
   )
+  
   l <- max(unlist(lapply(temp, function(v){return(v[1])})))
   u <- min(unlist(lapply(temp, function(v){return(v[2])})))
-  grid.index <- which((outGrid > l) & (outGrid < u))
+  grid.index <- which((outGrid >= l) & (outGrid <= u))
   grid.full <- outGrid
   outGrid <- outGrid[grid.index]
   
+  # raise a warning, outgrid is out of the input Lt
+  if(length(grid.full) > length(outGrid)){
+    warning('The input "outGrid" is out of the range of Lt, the list of time points in the "vars", in which case output "beta0" and "beta" will contain NA on the boundary.')
+  }
   # De-mean.
   demeanedRes <- demean(vars, userBwMu, kern)
   vars <- demeanedRes[['xList']]
   muList <- demeanedRes[['muList']]
   
-  allCov <- MvCov(vars, userBwCov, outGrid, kern, measurementError, center=FALSE, diag1D)
+  # Bug 2: diag1D = cross + measurementerror = T
+  # When we remove the diagnonal raw covariance, use 2D Local linear kernel smoother to estimate the cov
+  # use the 1D llks to estimate the cross-cov, the estimation of coef is not stable.
+  # one dimentional local linear kernel smoother 1D
+  # two dimentional local linear kernel smoother 2D
+  # A string specifying whether to use 1D smoothing for the diagonal line of the covariance. 
+  # 'none': don't use 1D smoothing; 
+  # 'cross': use 1D only for cross-covariances; 
+  # 'all': use 1D for both auto- and cross-covariances. (default : 'none')
+  # 
+  # Indicator measurement errors on the functional observations should be assumed. 
+  # If TRUE the diagonal raw covariance will be removed when smoothing. (default: TRUE)
+  allCov <- MvCov(vars, userBwCov, outGrid, kern, 
+                              measurementError, center=FALSE, 
+                              diag1D)
   beta <- sapply(seq_len(dim(allCov)[1]), function(i) {
     tmpCov <- allCov[i, i, , ]
     beta_ti <- qr.solve(tmpCov[1:p, 1:p], tmpCov[1:p, p + 1])
@@ -149,6 +167,7 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
   beta0 <- muList[[Yname]](outGrid) - colSums(t(muBeta))
   
   ## enlarge output
+  ## 
   beta0.full <- rep(NA,length(grid.full))
   beta0.full[grid.index] <- beta0
   if(is.vector(beta)){
@@ -204,7 +223,9 @@ demean <- function(vars, userBwMu, kern) {
 # INPUTS: same as FCReg
 # Output: a 4-D array containing the covariances. The first two dimensions corresponds to 
 # time s and t, and the last two dimensions correspond to the variables taken covariance upon.
-MvCov <- function(vars, userBwCov, outGrid, kern, measurementError=TRUE, center, diag1D='none') {
+MvCov <- function(vars, userBwCov, outGrid,
+                  kern, measurementError=TRUE, 
+                  center, diag1D='none') {
   if (!is.list(vars) || length(vars) < 1)
     stop('`vars` needs to be a list of length >= 1')
   
@@ -235,16 +256,20 @@ MvCov <- function(vars, userBwCov, outGrid, kern, measurementError=TRUE, center,
       #print(c(i,j))
       if (j <= i) {
         use1D <- diag1D == 'all' || ( diag1D == 'cross' && j != i )
-        covRes <- uniCov(vars[[i]], vars[[j]], userBwCov, outGrid, kern, 
-                         rmDiag = (i == j) && measurementError, 
-                         center, use1D)
-        if (attr(covRes, 'covType') %in% c('FF', 'SS'))
+        covRes <- fdaconcur:::uniCov(X = vars[[i]], Y = vars[[j]], 
+                                     userBwCov, 
+                                     outGrid,
+                                     kern, 
+                                     rmDiag = (i == j) && measurementError,
+                                     center, use1D)
+        if (attr(covRes, 'covType') %in% c('FF', 'SS')){
           res[, , i, j] <- covRes
-        else {
-          if (nrow(covRes) == 1)   # stats::cov(scalar, function)
+          } else {
+          if (nrow(covRes) == 1){   # stats::cov(scalar, function){
             res[, , i, j] <- matrix(covRes, lenoutGrid, lenoutGrid, byrow=TRUE)
-          else                     # stats::cov(function, scalar)
+          } else {                    # stats::cov(function, scalar)
             res[, , i, j] <- matrix(covRes, lenoutGrid, lenoutGrid, byrow=FALSE)
+          }
         }
       } else { # fill up the symmetric stats::cov(y, x)
         res[, , i, j] <- t(res[, , j, i])
@@ -262,7 +287,8 @@ MvCov <- function(vars, userBwCov, outGrid, kern, measurementError=TRUE, center,
 
 #X <- vars[[3]]
 #Y <- vars[[2]]
-uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=TRUE, use1D=FALSE) {
+uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', 
+                   rmDiag=FALSE, center=TRUE, use1D=FALSE) {
   flagScalerFunc <- FALSE
   # Force X to be a function in the scalar-function case.
   if (!is.list(X) && is.list(Y)) {
@@ -361,8 +387,10 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss', rmDiag=FALSE, center=
       diag(res) <- covXY
     } else { # use 2D smoothing
       
-      tmp <- fdapace::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
-                                 Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern, bwRoutine = 'grid-search')
+      tmp <- fdapace::GetCrCovYX(bw1 = userBwCov, bw2 = userBwCov, 
+                                 Ly1 = X[['Ly']], Lt1 = X[['Lt']], Ymu1 = Xmu, 
+                                 Ly2 = Y[['Ly']], Lt2 = Y[['Lt']], Ymu2 = Ymu, 
+                                 rmDiag=rmDiag, kern = kern, bwRoutine = 'grid-search')
       # if(snippet){
       #   tmp <- fdapace::GetCrCovYX(userBwCov, userBwCov, X[['Ly']], X[['Lt']], Xmu,
       #                   Y[['Ly']], Y[['Lt']], Ymu, rmDiag=rmDiag, kern=kern, bwRoutine = 'grid-search')
