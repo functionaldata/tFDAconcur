@@ -181,7 +181,7 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
   allCov.full[grid.index, grid.index,,] <- allCov
   
   #res <- list(beta=beta, beta0 = beta0, outGrid=outGrid, cov=allCov, R2=R2, n=n)
-  res <- list(beta=beta.full, beta0 = beta0.full, outGrid=outGrid, cov=allCov.full, R2=R2, n=n)
+  res <- list(beta=beta.full, beta0 = beta0.full, outGrid=grid.full, cov=allCov.full, R2=R2, n=n)
   if (!returnCov)
     res[['cov']] <- NULL
   res
