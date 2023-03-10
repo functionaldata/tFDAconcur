@@ -97,7 +97,7 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
   # Handle NaN, int to double
   vars[sapply(vars, is.list)] <- lapply(
     vars[sapply(vars, is.list)], 
-    function(v) HandleNumericsAndNAN(v[['Ly']], v[['Lt']])
+    function(v) fdapace:::HandleNumericsAndNAN(v[['Ly']], v[['Lt']])
   )
   # outGrid <- as.numeric(outGrid)
   
@@ -197,9 +197,9 @@ demean <- function(vars, userBwMu, kern) {
       
       if(is.null(userBwMu)){ # bandwidth choice for mean function is using GCV
         optns <- fdapace::SetOptions(x[['Ly']], x[['Lt']], list(userBwMu=userBwMu, methodBwMu ='GCV', kernel=kern))
-        xmu <- GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1], optns)[['mu']]
+        xmu <- fdapace:::GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1], optns)[['mu']]
       } else{
-        xmu <- GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1],
+        xmu <- fdapace:::GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1],
                                               list(userBwMu=userBwMu, kernel=kern))[['mu']]
       }
       
@@ -310,9 +310,9 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss',
       
       if(is.null(userBwCov)){ # bandwidth choice for mean function is using GCV
         optns <- fdapace::SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
-        Xmu <- GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1], optns)[['mu']]
+        Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1], optns)[['mu']]
       } else{
-        Xmu <- GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1],
+        Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1],
                                               list(userBwMu=userBwCov, kernel=kern))[['mu']]
       }
       Ymu <- mean(Y)
@@ -340,17 +340,17 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss',
       
       if(is.null(userBwCov)){ # bandwidth choice for mean function is using GCV
         optns <- fdapace::SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
-        Xmu <- GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1], optns)[['mu']]
+        Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1], optns)[['mu']]
       } else{
-        Xmu <- GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1],
+        Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1],
                                               list(userBwMu=userBwCov, kernel=kern))[['mu']]
       }
       
       if(is.null(userBwCov)){
         optns <- fdapace::SetOptions(Y[['Ly']], Y[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
-        Ymu <- GetSmoothedMeanCurve(Y[['Ly']], Y[['Lt']], TinX, TinX[1], optns)[['mu']]
+        Ymu <- fdapace:::GetSmoothedMeanCurve(Y[['Ly']], Y[['Lt']], TinX, TinX[1], optns)[['mu']]
       }else{
-        Ymu <- GetSmoothedMeanCurve(Y[['Ly']], Y[['Lt']], TinY, TinY[1], list(userBwMu=userBwCov, kernel=kern))[['mu']]
+        Ymu <- fdapace:::GetSmoothedMeanCurve(Y[['Ly']], Y[['Lt']], TinY, TinY[1], list(userBwMu=userBwCov, kernel=kern))[['mu']]
       }
     } else {
       Xmu <- rep(0, length(TinX))
@@ -377,7 +377,7 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss',
       
       if(is.null(userBwCov)){
         optns <- fdapace::SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
-        bw_mu =  unlist(GCVLwls1D1(yy = Xcent * Ycent, tt = tvecX, kernel = kern, npoly = 1, nder = 0, dataType = optns$dataType) )[1] 
+        bw_mu =  unlist(fdapace:::GCVLwls1D1(yy = Xcent * Ycent, tt = tvecX, kernel = kern, npoly = 1, nder = 0, dataType = optns$dataType) )[1] 
         covXY <- fdapace::Lwls1D(bw=bw_mu, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
       }else{
         covXY <- fdapace::Lwls1D(bw=userBwCov, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
@@ -401,7 +401,7 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss',
       
       gd <- tmp[['smoothGrid']]
       res <- matrix(
-        interp2lin(as.numeric(gd[, 1]),
+        fdapace:::interp2lin(as.numeric(gd[, 1]),
                              as.numeric(gd[, 2]),
                              matrix(as.numeric(tmp[['smoothedCC']]),
                                     nrow(tmp[['smoothedCC']]),
