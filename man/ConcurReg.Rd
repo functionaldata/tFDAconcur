@@ -10,8 +10,8 @@ ConcurReg(
   userBwMu = NULL,
   userBwCov = NULL,
   kern = "gauss",
-  measurementError = TRUE,
-  diag1D = "none",
+  measurementError = FALSE,
+  diag1D = "all",
   useGAM = FALSE,
   returnCov = TRUE
 )
@@ -34,10 +34,10 @@ default: NULL --- if no scalar value is provided, the bandwidth value for the sm
 "rect", "gauss", "epan", "gausvar", "quar" (default: "gauss")}
 
 \item{measurementError}{Indicator measurement errors on the functional observations 
-should be assumed. If TRUE the diagonal raw covariance will be removed when smoothing. (default: TRUE)}
+should be assumed. If TRUE the diagonal raw covariance will be removed when smoothing. (default: FALSE)}
 
 \item{diag1D}{A string specifying whether to use 1D smoothing for the diagonal line of the covariance. 
-'none': don't use 1D smoothing; 'cross': use 1D only for cross-covariances; 'all': use 1D for both auto- and cross-covariances. (default : 'none')}
+'none': don't use 1D smoothing; 'all': use 1D for both auto- and cross-covariances. (default : 'all')}
 
 \item{useGAM}{Indicator to use gam smoothing instead of local-linear smoothing (semi-parametric option) (default: FALSE)}
 
