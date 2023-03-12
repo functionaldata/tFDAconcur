@@ -124,18 +124,6 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
   vars <- demeanedRes[['xList']]
   muList <- demeanedRes[['muList']]
   
-  # Bug 2: diag1D = cross + measurementerror = T
-  # When we remove the diagnonal raw covariance, use 2D Local linear kernel smoother to estimate the cov
-  # use the 1D llks to estimate the cross-cov, the estimation of coef is not stable.
-  # one dimentional local linear kernel smoother 1D
-  # two dimentional local linear kernel smoother 2D
-  # A string specifying whether to use 1D smoothing for the diagonal line of the covariance. 
-  # 'none': don't use 1D smoothing; 
-  # 'cross': use 1D only for cross-covariances; 
-  # 'all': use 1D for both auto- and cross-covariances. (default : 'none')
-  # 
-  # Indicator measurement errors on the functional observations should be assumed. 
-  # If TRUE the diagonal raw covariance will be removed when smoothing. (default: TRUE)
   allCov <- MvCov(vars, userBwCov, outGrid, kern, 
                               measurementError, center=FALSE, 
                               diag1D)
@@ -255,7 +243,7 @@ MvCov <- function(vars, userBwCov, outGrid,
     for (i in seq_len(p)) {
       #print(c(i,j))
       if (j <= i) {
-        use1D <- diag1D == 'all' || ( diag1D == 'cross' && j != i )
+        use1D <- diag1D == 'all'
         covRes <- fdaconcur:::uniCov(X = vars[[i]], Y = vars[[j]], 
                                      userBwCov, 
                                      outGrid,
