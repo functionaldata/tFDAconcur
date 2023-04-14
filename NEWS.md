@@ -1,3 +1,3 @@
-fdaconcur v0.1.0 (Release date: 12-Aug-2022)
+fdaconcur v0.1.1 (Release date: 14-Apr-2023)
 ============
 * Initial release
