@@ -110,7 +110,7 @@ set.seed(1)
 X_1sp <- fdapace::Sparsify(X_1, T, sparsity)
 Ysp <- fdapace::Sparsify(Y, T, sparsity)
 vars <- list(X_1=X_1sp, Z_2=Z[, 2], Y=Ysp)
-res <-  GetCI_Sparse(vars, outGrid, level = 0.95, R = 2, 
+res <-  GetCI_Sparse(vars, outGrid[-c(1,21)], level = 0.95, R = 2, 
                              userBwMu = .1, userBwCov = .1,  
                              kern='gauss', measurementError=TRUE, diag1D='none',
                              useGAM = FALSE, returnCov=TRUE)

@@ -16,7 +16,7 @@
 #' @param measurementError Indicator measurement errors on the functional observations 
 #' should be assumed. If TRUE the diagonal raw covariance will be removed when smoothing. (default: FALSE)
 #' @param diag1D  A string specifying whether to use 1D smoothing for the diagonal line of the covariance. 
-#' 'none': don't use 1D smoothing; 'all': use 1D for both auto- and cross-covariances. (default : 'all')
+#' 'none': don't use 1D smoothing; 'all': use 1D for both auto- and cross-covariances. If TRUE the diagonal raw covariance will be removed when smoothing. (default : 'all')
 #' @param useGAM Indicator to use gam smoothing instead of local-linear smoothing (semi-parametric option) (default: FALSE)
 #' @param returnCov Indicator to return the covariance surfaces, which is a four dimensional array. The first two dimensions correspond to outGrid
 #'  and the last two correspond to the covariates and the response, i.e. (i, j, k, l) entry being Cov(X_k(t_i), X_l(t_j)) (default: FALSE)
@@ -78,7 +78,7 @@
 ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss', 
                       measurementError=FALSE, diag1D='all', useGAM = FALSE, returnCov=TRUE) {
   
-  n <- fdaconcur:::lengthVars(vars)
+  n <- lengthVars(vars)
   p <- length(vars) - 1
   if (p == 0)
     stop('Too few covariates.')
@@ -97,7 +97,7 @@ ConcurReg <- function(vars, outGrid, userBwMu=NULL, userBwCov=NULL,  kern='gauss
   # Handle NaN, int to double
   vars[sapply(vars, is.list)] <- lapply(
     vars[sapply(vars, is.list)], 
-    function(v) fdapace:::HandleNumericsAndNAN(v[['Ly']], v[['Lt']])
+    function(v) HandleNumericsAndNAN(v[['Ly']], v[['Lt']])
   )
   # outGrid <- as.numeric(outGrid)
   
@@ -185,9 +185,9 @@ demean <- function(vars, userBwMu, kern) {
       
       if(is.null(userBwMu)){ # bandwidth choice for mean function is using GCV
         optns <- fdapace::SetOptions(x[['Ly']], x[['Lt']], list(userBwMu=userBwMu, methodBwMu ='GCV', kernel=kern))
-        xmu <- fdapace:::GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1], optns)[['mu']]
+        xmu <- GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1], optns)[['mu']]
       } else{
-        xmu <- fdapace:::GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1],
+        xmu <- GetSmoothedMeanCurve(x[['Ly']], x[['Lt']] , Tin, Tin[1],
                                               list(userBwMu=userBwMu, kernel=kern))[['mu']]
       }
       
@@ -244,7 +244,7 @@ MvCov <- function(vars, userBwCov, outGrid,
       #print(c(i,j))
       if (j <= i) {
         use1D <- diag1D == 'all'
-        covRes <- fdaconcur:::uniCov(X = vars[[i]], Y = vars[[j]], 
+        covRes <- uniCov(X = vars[[i]], Y = vars[[j]], 
                                      userBwCov, 
                                      outGrid,
                                      kern, 
@@ -298,9 +298,9 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss',
       
       if(is.null(userBwCov)){ # bandwidth choice for mean function is using GCV
         optns <- fdapace::SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
-        Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1], optns)[['mu']]
+        Xmu <- GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1], optns)[['mu']]
       } else{
-        Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1],
+        Xmu <- GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], Tin, Tin[1],
                                               list(userBwMu=userBwCov, kernel=kern))[['mu']]
       }
       Ymu <- mean(Y)
@@ -328,17 +328,17 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss',
       
       if(is.null(userBwCov)){ # bandwidth choice for mean function is using GCV
         optns <- fdapace::SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
-        Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1], optns)[['mu']]
+        Xmu <- GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1], optns)[['mu']]
       } else{
-        Xmu <- fdapace:::GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1],
+        Xmu <- GetSmoothedMeanCurve(X[['Ly']], X[['Lt']], TinX, TinX[1],
                                               list(userBwMu=userBwCov, kernel=kern))[['mu']]
       }
       
       if(is.null(userBwCov)){
         optns <- fdapace::SetOptions(Y[['Ly']], Y[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
-        Ymu <- fdapace:::GetSmoothedMeanCurve(Y[['Ly']], Y[['Lt']], TinX, TinX[1], optns)[['mu']]
+        Ymu <- GetSmoothedMeanCurve(Y[['Ly']], Y[['Lt']], TinX, TinX[1], optns)[['mu']]
       }else{
-        Ymu <- fdapace:::GetSmoothedMeanCurve(Y[['Ly']], Y[['Lt']], TinY, TinY[1], list(userBwMu=userBwCov, kernel=kern))[['mu']]
+        Ymu <- GetSmoothedMeanCurve(Y[['Ly']], Y[['Lt']], TinY, TinY[1], list(userBwMu=userBwCov, kernel=kern))[['mu']]
       }
     } else {
       Xmu <- rep(0, length(TinX))
@@ -365,7 +365,7 @@ uniCov <- function(X, Y, userBwCov, outGrid, kern='gauss',
       
       if(is.null(userBwCov)){
         optns <- fdapace::SetOptions(X[['Ly']], X[['Lt']], list(userBwMu=userBwCov, methodBwMu ='GCV', kernel=kern))
-        bw_mu =  unlist(fdapace:::GCVLwls1D1(yy = Xcent * Ycent, tt = tvecX, kernel = kern, npoly = 1, nder = 0, dataType = optns$dataType) )[1] 
+        bw_mu =  unlist(GCVLwls1D1(yy = Xcent * Ycent, tt = tvecX, kernel = kern, npoly = 1, nder = 0, dataType = optns$dataType) )[1] 
         covXY <- fdapace::Lwls1D(bw=bw_mu, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)
       }else{
         covXY <- fdapace::Lwls1D(bw=userBwCov, kern, npoly=1L, nder=0L, xin=tvecX, yin=Xcent * Ycent, win=rep(1, length(tvecX)), xout=outGrid)

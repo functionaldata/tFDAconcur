@@ -19,8 +19,8 @@ test_that('Simple dense case works', {
   
   bw <- 0.25 * diff(range(T))
   kern <- 'epan'
-  res = ConcurReg(vars, T, measurementError=FALSE)
-  resN = ConcurReg(vars, T, measurementError=TRUE)
+  res = ConcurReg(vars, T, measurementError=FALSE, diag1D='none')
+  resN = ConcurReg(vars, T, measurementError=TRUE, diag1D='none')
   # plot(pts, res$beta); abline(a=0, b=1)
   # plot(pts, resN$beta); abline(a=0, b=1)
   res$beta = as.numeric(res$beta)
@@ -143,9 +143,9 @@ test_that('demean works', {
   expect_equal(covAll, covAllDemean)
 })
 
-withError2D <- ConcurReg(vars,outGrid, bw,bw)
-withError1D <- ConcurReg(vars, outGrid, bw,bw,  diag1D='cross')
-noError2D <- ConcurReg(vars,outGrid, bw,bw, measurementError=FALSE)
+# withError2D <- ConcurReg(vars,outGrid, bw,bw, measurementError = TRUE)
+# withError1D <- ConcurReg(vars, outGrid, bw,bw, measurementError = TRUE, diag1D='cross')
+noError2D <- ConcurReg(vars,outGrid, bw,bw, measurementError=FALSE, diag1D = "none")
 noError1D <- ConcurReg(vars, outGrid,bw, bw, measurementError=FALSE, diag1D='all')
 
 # matplot(outGrid, t(withError2D$beta), 'l')
@@ -162,29 +162,30 @@ expect_error(ConcurReg(vars, outGrid, bw, bw,  measurementError=TRUE, diag1D='al
 # min(eigen(noError2D[['cov']][i, i, 1:4, 1:4])[['values']])
 # })
 
+# since we drop diag1D = "cross" case, we do not need to test it.
 test_that('1D and 2D covariance estimates are similar', {
-  expect_true(sqrt(mean(
-    (withError2D[['beta']][,-which(colSums(is.na(withError2D[['beta']]))>0)] -
-       withError1D[['beta']][,-which(colSums(is.na(withError1D[['beta']]))>0)]
-    )^2, 
-    trim=0.2)) < 0.2)
+  # expect_true(sqrt(mean(
+  #   (withError2D[['beta']][,-which(colSums(is.na(withError2D[['beta']]))>0)] -
+  #      withError1D[['beta']][,-which(colSums(is.na(withError1D[['beta']]))>0)]
+  #   )^2,
+  #   trim=0.2)) < 0.2)
   expect_equal(noError2D[['beta']], noError1D[['beta']], tolerance=0.1)
 })
 
-withError2DRect <- ConcurReg(vars, outGrid,bw, bw,  kern='rect')
-withError1DRect <- ConcurReg(vars,  outGrid,bw,bw, diag1D='cross', kern='rect')
-noError2DRect <- ConcurReg(vars, outGrid, bw,bw, measurementError=FALSE, kern='rect')
+# withError2DRect <- ConcurReg(vars, outGrid,bw, bw,  kern='rect')
+# withError1DRect <- ConcurReg(vars,  outGrid,bw,bw, diag1D='cross', kern='rect')
+noError2DRect <- ConcurReg(vars, outGrid, bw,bw, measurementError=FALSE, diag1D = "none", kern='rect')
 noError1DRect <- ConcurReg(vars,  outGrid, bw,bw, measurementError=FALSE, diag1D='all', kern='rect')
-withError2DEpan <- ConcurReg(vars,  outGrid,bw,bw,  kern='epan')
-withError1DEpan <- ConcurReg(vars, outGrid, bw,bw,diag1D='cross', kern='epan')
-noError2DEpan <- ConcurReg(vars, outGrid, bw,bw,  measurementError=FALSE, kern='epan')
+# withError2DEpan <- ConcurReg(vars,  outGrid,bw,bw,  kern='epan')
+# withError1DEpan <- ConcurReg(vars, outGrid, bw,bw,diag1D='cross', kern='epan')
+noError2DEpan <- ConcurReg(vars, outGrid, bw,bw,  measurementError=FALSE, diag1D = "none", kern='epan')
 noError1DEpan <- ConcurReg(vars, outGrid, bw,bw, measurementError=FALSE, diag1D='all', kern='epan')
 
 test_that('Different kernel type works', {
-  expect_true(sqrt(mean(
-    (withError2DRect[['beta']][,-which(colSums(is.na(withError2DRect[['beta']]))>0)] - 
-       withError1DRect[['beta']][,-which(colSums(is.na(withError1DRect[['beta']]))>0)])^2, 
-    trim=0.2)) < 0.2)
+  # expect_true(sqrt(mean(
+  #   (withError2DRect[['beta']][,-which(colSums(is.na(withError2DRect[['beta']]))>0)] - 
+  #      withError1DRect[['beta']][,-which(colSums(is.na(withError1DRect[['beta']]))>0)])^2, 
+  #   trim=0.2)) < 0.2)
   expect_equal(noError2DRect[['beta']], noError2D[['beta']], tolerance=0.2)
   expect_equal(noError1DRect[['beta']], noError1D[['beta']], tolerance=0.2)
   # expect_equal(withError2DRect[['beta']], withError2DEpan[['beta']], tolerance=0.2)
@@ -278,10 +279,23 @@ test_that("Works with bandwidth selection returned by ConcurReg", {
   X_1sp <- fdapace::Sparsify(X_1, Sup, sparsity)
   Ysp <- fdapace::Sparsify(Y, Sup, sparsity)
   vars <- list(X_1=X_1sp, Z_2=Z[, 2], Y=Ysp)
-  withError2D <- ConcurReg(vars, outGrid)
-  l1 <- sqrt(mean((!is.na(withError2D$beta0))^2))
-  l2 <- sqrt(mean((!is.na(withError2D$beta[1,]-1)^2)))
-  l3 <- sqrt(mean((!is.na(withError2D$beta[2,]-1)^2)))
+  
+  withError2D <- ConcurReg(vars, outGrid, measurementError = TRUE, diag1D = "none")
+  l1 <- sqrt(mean((withError2D$beta0)^2, na.rm = TRUE))
+  l2 <- sqrt(mean(((withError2D$beta[1,]-1)^2), na.rm = TRUE))
+  l3 <- sqrt(mean(((withError2D$beta[2,]-1)^2), na.rm = TRUE))
+  expect_lt( max(c(l1, l2, l3)), 1)
+  
+  # Sparsify functional data
+  set.seed(1)
+  X_1sp <- fdapace::Sparsify(X_1, Sup, sparsity)
+  set.seed(1)
+  Ysp <- fdapace::Sparsify(Y, Sup, sparsity)
+  vars <- list(X_1=X_1sp, Z_2=Z[, 2], Y=Ysp)
+  noError1D <- ConcurReg(vars, outGrid, measurementError = FALSE, diag1D = "all")
+  l1 <- sqrt(mean((noError1D$beta0)^2, na.rm = TRUE))
+  l2 <- sqrt(mean(((noError1D$beta[1,]-1)^2), na.rm = TRUE))
+  l3 <- sqrt(mean(((noError1D$beta[2,]-1)^2), na.rm = TRUE))
   expect_lt( max(c(l1, l2, l3)), 1)
 })
 

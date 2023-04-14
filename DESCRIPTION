@@ -3,14 +3,17 @@ Type: Package
 Title: Concurrent Regression and History Index Models for Functional Data
 URL: https://github.com/functionaldata/tFDAconcur
 BugReports: https://github.com/functionaldata/tFDAconcur/issues
-Version: 0.1.0
+Version: 0.1.1
 Encoding: UTF-8
-Date: 2022-08-25
+Date: 2023-04-14
 Authors@R: 
-    c(person(given = "Satarupa",
-             family = "Bhattacharjee",
+    c(person(given = "Su I",
+             family = "Iao",
              role = c("aut", "cre"),
-             email = "sbhattacharjee@ucdavis.edu"),
+             email = "siao@ucdavis.edu"),
+      person(given = "Satarupa",
+             family = "Bhattacharjee",
+             role = "aut"),
       person(given = "Yaqing",
              family = "Chen",
              role = "aut"),
@@ -26,14 +29,17 @@ Authors@R:
       person(given = "Álvaro",
              family = "Gajardo",
              role = "aut"),
+      person(given = "Poorbita",
+             family = "Kundu",
+             role = "aut"),
       person(given = "Hans-Georg",
              family = "Müller",
              role = c("cph", "ths", "aut")))
-Maintainer: Satarupa Bhattacharjee <sbhattacharjee@ucdavis.edu>
-Description: Provides implementation of concurrent or varying coefficient regression methods for 
+Maintainer: Su I Iao <siao@ucdavis.edu>
+Description: Provides an implementation of concurrent or varying coefficient regression methods for 
     functional data. The implementations are done for both dense and sparsely observed functional
     data. Pointwise confidence bands can be constructed for each case. Further, the influence of
-    past predictor values is modeled by a smooth history index function, 
+    past predictor values are modeled by a smooth history index function, 
     while the effects on the response are described by smooth varying coefficient functions, 
     which are very useful in analyzing real data such as COVID data.
     References: Yao, F., Müller, H.G., Wang, J.L. (2005) <doi: 10.1214/009053605000000660>.

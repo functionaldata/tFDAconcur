@@ -37,7 +37,7 @@ default: NULL --- if no scalar value is provided, the bandwidth value for the sm
 should be assumed. If TRUE the diagonal raw covariance will be removed when smoothing. (default: FALSE)}
 
 \item{diag1D}{A string specifying whether to use 1D smoothing for the diagonal line of the covariance. 
-'none': don't use 1D smoothing; 'all': use 1D for both auto- and cross-covariances. (default : 'all')}
+'none': don't use 1D smoothing; 'all': use 1D for both auto- and cross-covariances. If TRUE the diagonal raw covariance will be removed when smoothing. (default : 'all')}
 
 \item{useGAM}{Indicator to use gam smoothing instead of local-linear smoothing (semi-parametric option) (default: FALSE)}
 

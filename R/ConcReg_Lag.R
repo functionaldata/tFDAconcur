@@ -39,7 +39,9 @@
 #' denseLy <- list()
 #' for (i in 1:n) {
 #'   denseLt[[i]] <- t0_out
-#'   denseLy[[i]] <- beta_0(t0_out) +  denseX0$Ly[[i]][1:length(t0_out)]* beta_1(t0_out) + rnorm(length(t0_out), 0, 0.1) 
+#'   denseLy[[i]] <- beta_0(t0_out) +  
+#'     denseX0$Ly[[i]][1:length(t0_out)]* beta_1(t0_out) + 
+#'     rnorm(length(t0_out), 0, 0.1) 
 #' }
 #' denseY <- list(Ly = denseLy, Lt = denseLt)
 #' model = ConcReg_Lag(Y=denseY, X=list(X1 = denseX0), Lag=Lag)
