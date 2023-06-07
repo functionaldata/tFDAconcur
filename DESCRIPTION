@@ -32,6 +32,9 @@ Authors@R:
       person(given = "Poorbita",
              family = "Kundu",
              role = "aut"),
+      person(given = "Hang",
+             family = "Zhou",
+             role = "aut"),
       person(given = "Hans-Georg",
              family = "Müller",
              role = c("cph", "ths", "aut")))
