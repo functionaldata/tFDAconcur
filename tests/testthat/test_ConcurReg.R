@@ -91,11 +91,11 @@ test_that('Scalar-function cov = Function-scalar cov', {
                t(uniCov(Z[, 3], X_1sp, bw, outGrid)))
 })
 
-cov12 <- uniCov(X_1sp, X_2sp, bw, outGrid, kern)
+cov12 <- uniCov(X_1sp, X_2sp, rep(bw,2), outGrid, kern)
 # cov12_rd <- uniCov(X_1sp, X_2sp, bw, outGrid, kern, rmDiag=TRUE)
-cov12_1D <- uniCov(X_1sp, X_2sp, bw, outGrid, kern, use1D=TRUE)
-cov13 <- uniCov(X_1sp, Z[, 3], bw, outGrid, kern)
-cov21 <- uniCov(X_2sp, X_1sp, bw, outGrid, kern)
+cov12_1D <- uniCov(X_1sp, X_2sp, rep(bw,2), outGrid, kern, use1D=TRUE)
+cov13 <- uniCov(X_1sp, Z[, 3], rep(bw,2), outGrid, kern)
+cov21 <- uniCov(X_2sp, X_1sp, rep(bw,2), outGrid, kern)
 # cov11 <- uniCov(X_1sp, X_1sp, bw, outGrid, kern)
 # cov11_rd <- uniCov(X_1sp, X_1sp, bw, outGrid, kern, rmDiag=TRUE)
 # cov22 <- uniCov(X_2sp, X_2sp, bw, outGrid, kern)
@@ -113,8 +113,8 @@ test_that('Function-function cov works', {
   # 1D and 2D smoother is similar
   expect_equal(diag(cov12), diag(cov12_1D), tolerance=0.2)
 })
-covAll <- MvCov(vars, bw, outGrid, kern,center= TRUE)
-covAllNoError <- MvCov(vars, bw, outGrid, kern, center= TRUE,measurementError=FALSE)
+covAll <- MvCov(vars, rep(bw,5), outGrid, kern,center= TRUE)
+covAllNoError <- MvCov(vars, rep(bw,5), outGrid, kern, center= TRUE,measurementError=FALSE)
 
 test_that('Multi-function/scalar cov works', {
   # The cov(x, y) and cov(y, x) is symmetric.
@@ -130,23 +130,23 @@ test_that('Multi-function/scalar cov works', {
   # rgl::persp3d(outGrid, outGrid, covAll[, , 1, 1], col='blue', xlab='X(s)', ylab='Y(t)')
 })
 
-demeanRes <- demean(vars, bw, kern)
+demeanRes <- demean(vars, rep(bw,5), kern)
 varsDemean <- demeanRes[['xList']]
 muDemean <- demeanRes[['muList']]
-covAllDemean <- MvCov(varsDemean, bw, outGrid, kern, center=FALSE)
+covAllDemean <- MvCov(varsDemean, rep(bw,5), outGrid, kern, center=FALSE)
 
 test_that('demean works', {
   expect_equal(demeanRes[['muList']][['Z_3']], mean(vars[['Z_3']]))
   expect_equal(demeanRes[['muList']][['Z_4']], mean(vars[['Z_4']]))
-  expect_equal(uniCov(varsDemean[['X_1']], varsDemean[['X_2']], bw, outGrid, center=FALSE), cov12)
-  expect_equal(uniCov(varsDemean[['X_1']], varsDemean[['Z_3']], bw, outGrid, center=FALSE), cov13)
+  expect_equal(uniCov(varsDemean[['X_1']], varsDemean[['X_2']], rep(bw,2), outGrid, center=FALSE), cov12)
+  expect_equal(uniCov(varsDemean[['X_1']], varsDemean[['Z_3']], rep(bw,2), outGrid, center=FALSE), cov13)
   expect_equal(covAll, covAllDemean)
 })
 
 # withError2D <- ConcurReg(vars,outGrid, bw,bw, measurementError = TRUE)
 # withError1D <- ConcurReg(vars, outGrid, bw,bw, measurementError = TRUE, diag1D='cross')
-noError2D <- ConcurReg(vars,outGrid, bw,bw, measurementError=FALSE, diag1D = "none")
-noError1D <- ConcurReg(vars, outGrid,bw, bw, measurementError=FALSE, diag1D='all')
+noError2D <- ConcurReg(vars, outGrid, rep(bw,5), rep(bw,5), measurementError=FALSE, diag1D = "none")
+noError1D <- ConcurReg(vars, outGrid, bw, bw, measurementError=FALSE, diag1D = 'all')
 
 # matplot(outGrid, t(withError2D$beta), 'l')
 # matplot(outGrid, t(noError2D$beta), 'l')
@@ -174,12 +174,12 @@ test_that('1D and 2D covariance estimates are similar', {
 
 # withError2DRect <- ConcurReg(vars, outGrid,bw, bw,  kern='rect')
 # withError1DRect <- ConcurReg(vars,  outGrid,bw,bw, diag1D='cross', kern='rect')
-noError2DRect <- ConcurReg(vars, outGrid, bw,bw, measurementError=FALSE, diag1D = "none", kern='rect')
-noError1DRect <- ConcurReg(vars,  outGrid, bw,bw, measurementError=FALSE, diag1D='all', kern='rect')
+noError2DRect <- ConcurReg(vars, outGrid, rep(bw,5), rep(bw,5), measurementError=FALSE, diag1D = "none", kern='rect')
+noError1DRect <- ConcurReg(vars,  outGrid, bw, bw, measurementError=FALSE, diag1D='all', kern='rect')
 # withError2DEpan <- ConcurReg(vars,  outGrid,bw,bw,  kern='epan')
 # withError1DEpan <- ConcurReg(vars, outGrid, bw,bw,diag1D='cross', kern='epan')
-noError2DEpan <- ConcurReg(vars, outGrid, bw,bw,  measurementError=FALSE, diag1D = "none", kern='epan')
-noError1DEpan <- ConcurReg(vars, outGrid, bw,bw, measurementError=FALSE, diag1D='all', kern='epan')
+noError2DEpan <- ConcurReg(vars, outGrid, rep(bw,5), rep(bw,5),  measurementError=FALSE, diag1D = "none", kern='epan')
+noError1DEpan <- ConcurReg(vars, outGrid, bw, bw, measurementError=FALSE, diag1D='all', kern='epan')
 
 test_that('Different kernel type works', {
   # expect_true(sqrt(mean(
