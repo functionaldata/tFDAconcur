@@ -22,27 +22,25 @@ Each field corresponds to a functional (a list) or scalar (a vector) covariate.
 The last entry is assumed to be the response if no entry is names 'Y'.
 If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of function values.}
 
-\item{outGrid}{A vector with the output time points}
+\item{outGrid}{A vector of output time points.}
 
-\item{userBwMu}{A scalar bandwidth used for smoothing the mean function --- positive numeric - 
-default: NULL --- if no scalar value is provided, the bandwidth value for the smoothed mean function is chosen using 'GCV';}
+\item{userBwMu}{A scalar/vector bandwidth used for smoothing the mean function. Each entry in the vector represents the bandwidth used for the corresponding covariate in vars. For the scalar covariates, you can input 0 as a placeholder. If you only input a scalar, the function will use the same bandwidth to smooth all mean functions. --- a scalar/vector of positive numeric -
+default: NULL --- if no scalar/vector value is provided, the bandwidth value for the smoothed mean function is chosen using 'GCV';}
 
-\item{userBwCov}{A scalar bandwidth used for smoothing the auto- and cross-covariances --- positive numeric - 
-default: NULL --- if no scalar value is provided, the bandwidth value for the smoothed mean function is chosen using 'GCV';}
+\item{userBwCov}{A scalar/vector bandwidth used for smoothing the auto or cross-covariances. If you use 1D smoothing for the diagonal line of the covariance (diag1D="all"), only one scalar input is needed. If you use 2D smoothing for the covariance (diag1D="none"), a vector of bandwidth is required. Each entry in the vector represents the bandwidth used for the corresponding covariate in vars. For the scalar covariates, you can input 0 as a placeholder. --- a scalar/vector of positive numeric - 
+default: NULL --- if no scalar/vector is provided, the bandwidth value for the smoothed cross-covariance function is chosen using 'GCV';}
 
-\item{kern}{Smoothing kernel choice, common for mu and covariance; 
-"rect", "gauss", "epan", "gausvar", "quar" (default: "gauss")}
+\item{kern}{Smoothing kernel choice, common for mu and covariance; "rect", "gauss", "epan", "gausvar", "quar" - default: "gauss".}
 
-\item{measurementError}{Indicator measurement errors on the functional observations 
-should be assumed. If TRUE the diagonal raw covariance will be removed when smoothing. (default: FALSE)}
+\item{measurementError}{Assume measurement error in the data; logical - default: TRUE. If TRUE the diagonal raw covariance will be removed when smoothing.}
 
 \item{diag1D}{A string specifying whether to use 1D smoothing for the diagonal line of the covariance. 
 'none': don't use 1D smoothing; 'all': use 1D for both auto- and cross-covariances. If TRUE the diagonal raw covariance will be removed when smoothing. (default : 'all')}
 
-\item{useGAM}{Indicator to use gam smoothing instead of local-linear smoothing (semi-parametric option) (default: FALSE)}
+\item{useGAM}{Use GAM smoothing instead of local linear smoothing (semi-parametric option);  logical - default: FALSE.}
 
-\item{returnCov}{Indicator to return the covariance surfaces, which is a four dimensional array. The first two dimensions correspond to outGrid
-and the last two correspond to the covariates and the response, i.e. (i, j, k, l) entry being Cov(X_k(t_i), X_l(t_j)) (default: FALSE)}
+\item{returnCov}{Return the covariance surfaces, which is a four dimensional array. The first two dimensions correspond to outGrid
+and the last two correspond to the covariates and the response, i.e. (i, j, k, l) entry being Cov(X_k(t_i), X_l(t_j));  logical - default: FALSE.}
 }
 \value{
 A list containing the following fields:
@@ -94,7 +92,7 @@ X_1sp <- fdapace::Sparsify(X_1, T, sparsity)
 set.seed(1)
 Ysp <- fdapace::Sparsify(Y, T, sparsity)
 vars <- list(X_1=X_1sp, Z_2=Z[, 2], Y=Ysp)
-res2 <- ConcurReg(vars, outGrid, userBwMu = .5, userBwCov=.5,  kern='gauss',
+res2 <- ConcurReg(vars, outGrid, userBwMu=c(.5,0,.5), userBwCov=c(.5,0,.5), kern='gauss',
  measurementError=TRUE, diag1D='none', useGAM = FALSE, returnCov=TRUE)
 }
 \references{
