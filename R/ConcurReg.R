@@ -4,8 +4,8 @@
 #' 
 #' @param vars A list of input functional/scalar covariates.
 #'  Each field corresponds to a functional (a list) or scalar (a vector) covariate. 
-#'  The last entry is assumed to be the response if no entry is names 'Y'.
-#'  If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of function values.
+#'  The last entry is assumed to be the response if no entry is named 'Y'.
+#'  If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of functional values.
 #' @param outGrid A vector of output time points.
 #' @param userBwMu A scalar/vector bandwidth used for smoothing the mean function. Each entry in the vector represents the bandwidth used for the corresponding covariate in vars. For the scalar covariates, you can input 0 as a placeholder. If you only input a scalar, the function will use the same bandwidth to smooth all mean functions. --- a scalar/vector of positive numeric -
 #' default: NULL --- if no scalar/vector value is provided, the bandwidth value for the smoothed mean function is chosen using 'GCV'; 
