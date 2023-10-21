@@ -141,7 +141,7 @@ GetCI_Sparse = function(vars, outGrid = NULL, level = 0.95, R = 999, userBwMu = 
       temp_ind = lapply(vars[sapply(vars, is.list)], function(v) {return(range(unlist(v[['Lt']][ind])))})
       l_ind = max(unlist(lapply(temp_ind, function(v){return(v[1])})))
       u_ind = min(unlist(lapply(temp_ind, function(v){return(v[2])})))
-      if(l_ind <= l5 | u_ind >= u95){
+      if(l_ind <= l5 & u_ind >= u95){
         OutOfRange = FALSE
       }
     }
