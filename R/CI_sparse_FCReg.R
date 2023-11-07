@@ -4,7 +4,7 @@
 #' Each field corresponds to a functional (a list) or scalar (a vector) covariate. 
 #' The last entry is assumed to be the response if no entry is named 'Y'.
 #' If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of functional values.
-#' @param outGrid A vector with the output time points, which need to be within 5% and 95% of the range of functional covariates. If NULL, outGrid will be generated from 5% to 95% of the range of functional covariates with 51 grids for fitting. Default: NULL
+#' @param outGrid A vector with the output time points, which need to be within 5\% and 95\% of the range of functional covariates. If NULL, outGrid will be generated from 5\% to 95\% of the range of functional covariates with 51 grids for fitting. Default: NULL
 #' @param level A number taking values in [0,1] determining the confidence level. Default: 0.95.
 #' @param R An integer holding the number of bootstrap replicates. Default: 999.
 #' @param userBwMu A scalar/vector bandwidth used for smoothing the mean function. Each entry in the vector represents the bandwidth used for the corresponding covariate in vars. For the scalar covariates, you can input 0 as a placeholder. If you only input a scalar, the function will use the same bandwidth to smooth all mean functions. --- a scalar/vector of positive numeric -
@@ -21,6 +21,7 @@
 #' @details If measurement error is assumed, the diagonal elements of the raw covariance will be removed. This could result in highly unstable estimate 
 #' if the design is very sparse, or strong seasonality presents. 
 #' WARNING! For very sparse functional data, setting measurementError = TRUE is not recommended.
+#' 
 #' @return A list containing the following fields: 
 #' \describe{
 #' \item{CI_beta0}{CI for the intercept function --- A data frame holding three variables: 
@@ -74,7 +75,7 @@
 #' res <-  GetCI_Sparse(vars, outGrid[-c(1,21)], level = 0.95, R = 2,
 #'                      userBwMu = c(.1,.1,.1), userBwCov = c(.1,.1,.1),
 #'                      kern='gauss', measurementError=TRUE, diag1D='none',
-#'                      useGAM = FALSE, returnCov=TRUE)
+#'                      useGAM = FALSE)
 #' @export
 
 GetCI_Sparse = function(vars, outGrid = NULL, level = 0.95, R = 999, userBwMu = NULL, userBwCov = NULL,  

@@ -6,49 +6,44 @@
 \usage{
 GetCI_Sparse(
   vars,
-  outGrid,
+  outGrid = NULL,
   level = 0.95,
-  R,
-  userBwMu,
-  userBwCov,
-  kern,
-  measurementError,
-  diag1D,
-  useGAM,
-  returnCov
+  R = 999,
+  userBwMu = NULL,
+  userBwCov = NULL,
+  kern = "gauss",
+  measurementError = FALSE,
+  diag1D = "all",
+  useGAM = FALSE
 )
 }
 \arguments{
 \item{vars}{A list of input functional/scalar covariates.
 Each field corresponds to a functional (a list) or scalar (a vector) covariate. 
-The last entry is assumed to be the response if no entry is names 'Y'.
-If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of function values.}
+The last entry is assumed to be the response if no entry is named 'Y'.
+If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of functional values.}
 
-\item{outGrid}{A vector with the output time points}
+\item{outGrid}{A vector with the output time points, which need to be within 5\% and 95\% of the range of functional covariates. If NULL, outGrid will be generated from 5\% to 95\% of the range of functional covariates with 51 grids for fitting. Default: NULL}
 
-\item{level}{A number taking values in [0,1] determing the confidence level. Default: 0.95.}
+\item{level}{A number taking values in [0,1] determining the confidence level. Default: 0.95.}
 
 \item{R}{An integer holding the number of bootstrap replicates. Default: 999.}
 
-\item{userBwMu}{A scalar bandwidth used for smoothing the mean function --- positive numeric - 
-default: NULL --- if no scalar value is provided, the bandwidth value for the smoothed mean function is chosen using 'GCV';}
+\item{userBwMu}{A scalar/vector bandwidth used for smoothing the mean function. Each entry in the vector represents the bandwidth used for the corresponding covariate in vars. For the scalar covariates, you can input 0 as a placeholder. If you only input a scalar, the function will use the same bandwidth to smooth all mean functions. --- a scalar/vector of positive numeric -
+default: NULL --- if no scalar/vector value is provided, the bandwidth value for the smoothed mean function is chosen using 'GCV';}
 
-\item{userBwCov}{A scalar bandwidth used for smoothing the auto- and cross-covariances --- positive numeric - 
-default: NULL --- if no scalar value is provided, the bandwidth value for the smoothed mean function is chosen using 'GCV';}
+\item{userBwCov}{A scalar/vector bandwidth used for smoothing the auto or cross-covariances. If you use 1D smoothing for the diagonal line of the covariance (diag1D="all"), only one scalar input is needed. If you use 2D smoothing for the covariance (diag1D="none"), a vector of bandwidth is required. Each entry in the vector represents the bandwidth used for the corresponding covariate in vars. For the scalar covariates, you can input 0 as a placeholder. --- a scalar/vector of positive numeric - 
+default: NULL --- if no scalar/vector is provided, the bandwidth value for the smoothed cross-covariance function is chosen using 'GCV';}
 
 \item{kern}{Smoothing kernel choice, common for mu and covariance; 
 "rect", "gauss", "epan", "gausvar", "quar" (default: "gauss")}
 
-\item{measurementError}{Indicator measurement errors on the functional observations 
-should be assumed. If TRUE the diagonal raw covariance will be removed when smoothing. (default: TRUE)}
+\item{measurementError}{Assume measurement error in the data; logical - default: FALSE. If TRUE the diagonal raw covariance will be removed when smoothing.}
 
 \item{diag1D}{A string specifying whether to use 1D smoothing for the diagonal line of the covariance. 
-'none': don't use 1D smoothing; 'cross': use 1D only for cross-covariances; 'all': use 1D for both auto- and cross-covariances. (default : 'none')}
+'none': don't use 1D smoothing; 'all': use 1D for both auto- and cross-covariances. (default : 'all')}
 
-\item{useGAM}{Indicator to use gam smoothing instead of local-linear smoothing (semi-parametric option) (default: FALSE)}
-
-\item{returnCov}{Indicator to return the covariance surfaces, which is a four dimensional array. The first two dimensions correspond to outGrid
-and the last two correspond to the covariates and the response, i.e. (i, j, k, l) entry being Cov(X_k(t_i), X_l(t_j)) (default: FALSE)}
+\item{useGAM}{Use GAM smoothing instead of local linear smoothing (semi-parametric option);  logical - default: FALSE.}
 }
 \value{
 A list containing the following fields: 
@@ -62,7 +57,7 @@ for the intercept function on \code{CIgrid}.}
 the list is same as the number of covariates. Each list contains the following fields:
 A data frame holding three variables: \code{CIgrid} --- the time grid where the CIs are evaluated,
 \code{CI_beta_j.lower} and \code{CI_beta_j.upper} --- the lower and upper bounds of the CIs 
-for the intercept function on \code{CIgrid} for \eqn{j = 1,2,\dots}.}
+for the coefficient functions on \code{CIgrid} for \eqn{j = 1,2,\dots}.}
 
 \item{CI_R2}{CI the time-varying \eqn{R^2(t)} --- A data frame holding three variables: 
 \code{CIgrid} --- the time grid where the CIs are evaluated,
@@ -110,8 +105,8 @@ set.seed(1)
 X_1sp <- fdapace::Sparsify(X_1, T, sparsity)
 Ysp <- fdapace::Sparsify(Y, T, sparsity)
 vars <- list(X_1=X_1sp, Z_2=Z[, 2], Y=Ysp)
-res <-  GetCI_Sparse(vars, outGrid[-c(1,21)], level = 0.95, R = 2, 
-                             userBwMu = .1, userBwCov = .1,  
-                             kern='gauss', measurementError=TRUE, diag1D='none',
-                             useGAM = FALSE, returnCov=TRUE)
+res <-  GetCI_Sparse(vars, outGrid[-c(1,21)], level = 0.95, R = 2,
+                     userBwMu = c(.1,.1,.1), userBwCov = c(.1,.1,.1),
+                     kern='gauss', measurementError=TRUE, diag1D='none',
+                     useGAM = FALSE)
 }

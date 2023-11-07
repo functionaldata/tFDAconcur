@@ -19,8 +19,8 @@ ConcurReg(
 \arguments{
 \item{vars}{A list of input functional/scalar covariates.
 Each field corresponds to a functional (a list) or scalar (a vector) covariate. 
-The last entry is assumed to be the response if no entry is names 'Y'.
-If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of function values.}
+The last entry is assumed to be the response if no entry is named 'Y'.
+If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of functional values.}
 
 \item{outGrid}{A vector of output time points.}
 
@@ -32,10 +32,10 @@ default: NULL --- if no scalar/vector is provided, the bandwidth value for the s
 
 \item{kern}{Smoothing kernel choice, common for mu and covariance; "rect", "gauss", "epan", "gausvar", "quar" - default: "gauss".}
 
-\item{measurementError}{Assume measurement error in the data; logical - default: TRUE. If TRUE the diagonal raw covariance will be removed when smoothing.}
+\item{measurementError}{Assume measurement error in the data; logical - default: FALSE. If TRUE the diagonal raw covariance will be removed when smoothing.}
 
 \item{diag1D}{A string specifying whether to use 1D smoothing for the diagonal line of the covariance. 
-'none': don't use 1D smoothing; 'all': use 1D for both auto- and cross-covariances. If TRUE the diagonal raw covariance will be removed when smoothing. (default : 'all')}
+'none': don't use 1D smoothing; 'all': use 1D for both auto- and cross-covariances. (default : 'all')}
 
 \item{useGAM}{Use GAM smoothing instead of local linear smoothing (semi-parametric option);  logical - default: FALSE.}
 
