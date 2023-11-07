@@ -4,17 +4,17 @@
 #' 
 #' @param vars A list of input functional/scalar covariates.
 #'  Each field corresponds to a functional (a list) or scalar (a vector) covariate. 
-#'  The last entry is assumed to be the response if no entry is names 'Y'.
-#'  If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of function values.
+#'  The last entry is assumed to be the response if no entry is named 'Y'.
+#'  If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of functional values.
 #' @param outGrid A vector of output time points.
 #' @param userBwMu A scalar/vector bandwidth used for smoothing the mean function. Each entry in the vector represents the bandwidth used for the corresponding covariate in vars. For the scalar covariates, you can input 0 as a placeholder. If you only input a scalar, the function will use the same bandwidth to smooth all mean functions. --- a scalar/vector of positive numeric -
 #' default: NULL --- if no scalar/vector value is provided, the bandwidth value for the smoothed mean function is chosen using 'GCV'; 
 #' @param userBwCov A scalar/vector bandwidth used for smoothing the auto or cross-covariances. If you use 1D smoothing for the diagonal line of the covariance (diag1D="all"), only one scalar input is needed. If you use 2D smoothing for the covariance (diag1D="none"), a vector of bandwidth is required. Each entry in the vector represents the bandwidth used for the corresponding covariate in vars. For the scalar covariates, you can input 0 as a placeholder. --- a scalar/vector of positive numeric - 
 #' default: NULL --- if no scalar/vector is provided, the bandwidth value for the smoothed cross-covariance function is chosen using 'GCV';
 #' @param kern Smoothing kernel choice, common for mu and covariance; "rect", "gauss", "epan", "gausvar", "quar" - default: "gauss".
-#' @param measurementError Assume measurement error in the data; logical - default: TRUE. If TRUE the diagonal raw covariance will be removed when smoothing.
+#' @param measurementError Assume measurement error in the data; logical - default: FALSE. If TRUE the diagonal raw covariance will be removed when smoothing.
 #' @param diag1D  A string specifying whether to use 1D smoothing for the diagonal line of the covariance. 
-#' 'none': don't use 1D smoothing; 'all': use 1D for both auto- and cross-covariances. If TRUE the diagonal raw covariance will be removed when smoothing. (default : 'all')
+#' 'none': don't use 1D smoothing; 'all': use 1D for both auto- and cross-covariances. (default : 'all')
 #' @param useGAM Use GAM smoothing instead of local linear smoothing (semi-parametric option);  logical - default: FALSE.
 #' @param returnCov Return the covariance surfaces, which is a four dimensional array. The first two dimensions correspond to outGrid
 #'  and the last two correspond to the covariates and the response, i.e. (i, j, k, l) entry being Cov(X_k(t_i), X_l(t_j));  logical - default: FALSE.
