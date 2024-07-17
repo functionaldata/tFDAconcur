@@ -19,7 +19,7 @@ GetCI_Sparse(
 }
 \arguments{
 \item{vars}{A list of input functional/scalar covariates.
-Each field corresponds to a functional (a list) or scalar (a vector) covariate. 
+Each field corresponds to a functional (a list) or scalar (a vector) covariate.
 The last entry is assumed to be the response if no entry is named 'Y'.
 If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of functional values.}
 
@@ -32,36 +32,36 @@ If a field corresponds to a functional covariate, it should have two fields: 'Lt
 \item{userBwMu}{A scalar/vector bandwidth used for smoothing the mean function. Each entry in the vector represents the bandwidth used for the corresponding covariate in vars. For the scalar covariates, you can input 0 as a placeholder. If you only input a scalar, the function will use the same bandwidth to smooth all mean functions. --- a scalar/vector of positive numeric -
 default: NULL --- if no scalar/vector value is provided, the bandwidth value for the smoothed mean function is chosen using 'GCV';}
 
-\item{userBwCov}{A scalar/vector bandwidth used for smoothing the auto or cross-covariances. If you use 1D smoothing for the diagonal line of the covariance (diag1D="all"), only one scalar input is needed. If you use 2D smoothing for the covariance (diag1D="none"), a vector of bandwidth is required. Each entry in the vector represents the bandwidth used for the corresponding covariate in vars. For the scalar covariates, you can input 0 as a placeholder. --- a scalar/vector of positive numeric - 
+\item{userBwCov}{A scalar/vector bandwidth used for smoothing the auto or cross-covariances. If you use 1D smoothing for the diagonal line of the covariance (diag1D="all"), only one scalar input is needed. If you use 2D smoothing for the covariance (diag1D="none"), a vector of bandwidth is required. Each entry in the vector represents the bandwidth used for the corresponding covariate in vars. For the scalar covariates, you can input 0 as a placeholder. --- a scalar/vector of positive numeric -
 default: NULL --- if no scalar/vector is provided, the bandwidth value for the smoothed cross-covariance function is chosen using 'GCV';}
 
-\item{kern}{Smoothing kernel choice, common for mu and covariance; 
+\item{kern}{Smoothing kernel choice, common for mu and covariance;
 "rect", "gauss", "epan", "gausvar", "quar" (default: "gauss")}
 
 \item{measurementError}{Assume measurement error in the data; logical - default: FALSE. If TRUE the diagonal raw covariance will be removed when smoothing.}
 
-\item{diag1D}{A string specifying whether to use 1D smoothing for the diagonal line of the covariance. 
+\item{diag1D}{A string specifying whether to use 1D smoothing for the diagonal line of the covariance.
 'none': don't use 1D smoothing; 'all': use 1D for both auto- and cross-covariances. (default : 'all')}
 
 \item{useGAM}{Use GAM smoothing instead of local linear smoothing (semi-parametric option);  logical - default: FALSE.}
 }
 \value{
-A list containing the following fields: 
+A list containing the following fields:
 \describe{
-\item{CI_beta0}{CI for the intercept function --- A data frame holding three variables: 
+\item{CI_beta0}{CI for the intercept function --- A data frame holding three variables:
 \code{CIgrid} --- the time grid where the CIs are evaluated,
-\code{CI_beta0.lower} and \code{CI_beta0.upper} --- the lower and upper bounds of the CIs 
+\code{CI_beta0.lower} and \code{CI_beta0.upper} --- the lower and upper bounds of the CIs
 for the intercept function on \code{CIgrid}.}
 
 \item{CI_beta}{ A list containing CIs for the slope functions --- the length of
 the list is same as the number of covariates. Each list contains the following fields:
 A data frame holding three variables: \code{CIgrid} --- the time grid where the CIs are evaluated,
-\code{CI_beta_j.lower} and \code{CI_beta_j.upper} --- the lower and upper bounds of the CIs 
+\code{CI_beta_j.lower} and \code{CI_beta_j.upper} --- the lower and upper bounds of the CIs
 for the coefficient functions on \code{CIgrid} for \eqn{j = 1,2,\dots}.}
 
-\item{CI_R2}{CI the time-varying \eqn{R^2(t)} --- A data frame holding three variables: 
+\item{CI_R2}{CI the time-varying \eqn{R^2(t)} --- A data frame holding three variables:
 \code{CIgrid} --- the time grid where the CIs are evaluated,
-\code{CI_R2.lower} and \code{CI_R2.upper} --- the lower and upper bounds of the CIs 
+\code{CI_R2.lower} and \code{CI_R2.upper} --- the lower and upper bounds of the CIs
 for the time-varying \eqn{R^2(t)} on \code{CIgrid}.}
 
 \item{level}{The confidence level of the CIs.}
@@ -71,8 +71,8 @@ for the time-varying \eqn{R^2(t)} on \code{CIgrid}.}
 Bootstrap pointwise confidence intervals for the coefficient functions in functional concurrent regression for sparsely observed data.
 }
 \details{
-If measurement error is assumed, the diagonal elements of the raw covariance will be removed. This could result in highly unstable estimate 
-if the design is very sparse, or strong seasonality presents. 
+If measurement error is assumed, the diagonal elements of the raw covariance will be removed. This could result in highly unstable estimate
+if the design is very sparse, or strong seasonality presents.
 WARNING! For very sparse functional data, setting measurementError = TRUE is not recommended.
 }
 \examples{

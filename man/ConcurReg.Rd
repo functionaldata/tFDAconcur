@@ -18,7 +18,7 @@ ConcurReg(
 }
 \arguments{
 \item{vars}{A list of input functional/scalar covariates.
-Each field corresponds to a functional (a list) or scalar (a vector) covariate. 
+Each field corresponds to a functional (a list) or scalar (a vector) covariate.
 The last entry is assumed to be the response if no entry is named 'Y'.
 If a field corresponds to a functional covariate, it should have two fields: 'Lt', a list of time points, and 'Ly', a list of functional values.}
 
@@ -27,14 +27,14 @@ If a field corresponds to a functional covariate, it should have two fields: 'Lt
 \item{userBwMu}{A scalar/vector bandwidth used for smoothing the mean function. Each entry in the vector represents the bandwidth used for the corresponding covariate in vars. For the scalar covariates, you can input 0 as a placeholder. If you only input a scalar, the function will use the same bandwidth to smooth all mean functions. --- a scalar/vector of positive numeric -
 default: NULL --- if no scalar/vector value is provided, the bandwidth value for the smoothed mean function is chosen using 'GCV';}
 
-\item{userBwCov}{A scalar/vector bandwidth used for smoothing the auto or cross-covariances. If you use 1D smoothing for the diagonal line of the covariance (diag1D="all"), only one scalar input is needed. If you use 2D smoothing for the covariance (diag1D="none"), a vector of bandwidth is required. Each entry in the vector represents the bandwidth used for the corresponding covariate in vars. For the scalar covariates, you can input 0 as a placeholder. --- a scalar/vector of positive numeric - 
+\item{userBwCov}{A scalar/vector bandwidth used for smoothing the auto or cross-covariances. If you use 1D smoothing for the diagonal line of the covariance (diag1D="all"), only one scalar input is needed. If you use 2D smoothing for the covariance (diag1D="none"), a vector of bandwidth is required. Each entry in the vector represents the bandwidth used for the corresponding covariate in vars. For the scalar covariates, you can input 0 as a placeholder. --- a scalar/vector of positive numeric -
 default: NULL --- if no scalar/vector is provided, the bandwidth value for the smoothed cross-covariance function is chosen using 'GCV';}
 
 \item{kern}{Smoothing kernel choice, common for mu and covariance; "rect", "gauss", "epan", "gausvar", "quar" - default: "gauss".}
 
 \item{measurementError}{Assume measurement error in the data; logical - default: FALSE. If TRUE the diagonal raw covariance will be removed when smoothing.}
 
-\item{diag1D}{A string specifying whether to use 1D smoothing for the diagonal line of the covariance. 
+\item{diag1D}{A string specifying whether to use 1D smoothing for the diagonal line of the covariance.
 'none': don't use 1D smoothing; 'all': use 1D for both auto- and cross-covariances. (default : 'all')}
 
 \item{useGAM}{Use GAM smoothing instead of local linear smoothing (semi-parametric option);  logical - default: FALSE.}
@@ -55,7 +55,7 @@ A list containing the following fields:
 Functional concurrent regression with dense or sparse functional data for scalar or functional dependent variables. Note: function-to-scalar regression can also be handled using the VCAM function in fdapace.
 }
 \details{
-If measurement error is assumed, the diagonal elements of the raw covariance will be removed. This could result in highly unstable estimate if the design is very sparse, or strong seasonality presents. 
+If measurement error is assumed, the diagonal elements of the raw covariance will be removed. This could result in highly unstable estimate if the design is very sparse, or strong seasonality presents.
 WARNING! For very sparse functional data, setting measurementError = TRUE is not recommended.
 }
 \examples{
@@ -97,8 +97,8 @@ res2 <- ConcurReg(vars, outGrid, userBwMu=c(.5,0,.5), userBwCov=c(.5,0,.5), kern
 }
 \references{
 \itemize{
-\item \cite{Yao, F., Müller, H.G., Wang, J.L. "Functional Linear Regression Analysis for Longitudinal Data." Annals of Statistics 33, (2005): 2873-2903.(Dense data)} 
+\item \cite{Yao, F., Müller, H.G., Wang, J.L. "Functional Linear Regression Analysis for Longitudinal Data." Annals of Statistics 33, (2005): 2873-2903.(Dense data)}
 \item \cite{Sentürk, D., Müller, H.G. "Functional varying coefficient models for longitudinal data." J. American Statistical Association, 10, (2010): 1256--1264.}
-\item \cite{Sentürk, D., Nguyen, D.V. "Varying Coefficient Models for Sparse Noise-contaminated Longitudinal Data", Statistica Sinica 21(4), (2011): 1831-1856. (Sparse data)} 
+\item \cite{Sentürk, D., Nguyen, D.V. "Varying Coefficient Models for Sparse Noise-contaminated Longitudinal Data", Statistica Sinica 21(4), (2011): 1831-1856. (Sparse data)}
 }
 }

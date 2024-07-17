@@ -29,12 +29,12 @@ A list of the following:
 Functional history index model for dense functional responses and dense functional predictors.
 }
 \details{
-The functional history index model is defined as 
-\eqn{E[Y(t)|X_1(t), \cdots, X_p(t)] = \beta_0(t) + \sum_{i=1}^p\beta_i(t)\int_0^{\Delta_i}\gamma_i(s)X_i(t-s)ds} 
-for \eqn{t\in[\max_i\{\Delta_i\}, T]} with a suitable \eqn{T>0}. 
-Write \eqn{\alpha_i(t, s)=\beta_i(t)\gamma_i(s)}. It becomes 
-\eqn{E[Y(t)|X_1(t), \cdots, X_p(t)] = \beta_0(t) + \sum_{i=1}^p\int_0^{\Delta_i}\alpha_i(t, s)X_i(t-s)ds}. 
-For more details we refer to 
+The functional history index model is defined as
+\eqn{E[Y(t)|X_1(t), \cdots, X_p(t)] = \beta_0(t) + \sum_{i=1}^p\beta_i(t)\int_0^{\Delta_i}\gamma_i(s)X_i(t-s)ds}
+for \eqn{t\in[\max_i\{\Delta_i\}, T]} with a suitable \eqn{T>0}.
+Write \eqn{\alpha_i(t, s)=\beta_i(t)\gamma_i(s)}. It becomes
+\eqn{E[Y(t)|X_1(t), \cdots, X_p(t)] = \beta_0(t) + \sum_{i=1}^p\int_0^{\Delta_i}\alpha_i(t, s)X_i(t-s)ds}.
+For more details we refer to
 \cite{Şentürk, D. and Müller, H.G., (2010). Functional varying coefficient models for longitudinal data. Journal of the American Statistical Association, 105(491), pp.1256-1264.}
 }
 \examples{
@@ -63,7 +63,7 @@ gamma_u <- function(u) sqrt(2/5) * cos(pi * u /5)
 beta_1 <- function(t) 5*sin(pi*t/10)
 beta_0 <- function(t) t^2/2
 
-### functional response Y(t), t in t0_out ### 
+### functional response Y(t), t in t0_out ###
 denseLt <- list()
 denseLy <- list()
 for (i in 1:n) {
@@ -76,7 +76,7 @@ for (i in 1:n) {
     fdapace::trapzRcpp(u0, gamma_u(u0) * v)
   })
   #append 0 in the first length(u0)-1 element(useless info. in our modeling)
-  denseLy[[i]] <- beta_0(t0_out) + IntGammaXtu * beta_1(t0_out) + rnorm(length(t0_out), 0, 0.1) 
+  denseLy[[i]] <- beta_0(t0_out) + IntGammaXtu * beta_1(t0_out) + rnorm(length(t0_out), 0, 0.1)
 }
 denseY <- list(Ly = denseLy, Lt = denseLt)
 
